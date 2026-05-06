@@ -4,21 +4,25 @@
   <meta charset="UTF-8">
   <title>Corporate Access Dashboard</title>
   <style>
-    :root { --primary: #1a73e8; --success: #0f9d58; --danger: #dc2626; --bg: #f3f4f6; --text: #1f2937; }
+    :root { --primary: #1a73e8; --success: #0f9d58; --warning: #f59e0b; --danger: #dc2626; --bg: #f3f4f6; --text: #1f2937; }
     body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--bg); color:var(--text); }
     
-    /* LOGIN SCREEN */
     #loginScreen { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(17,24,39,0.95); display:flex; justify-content:center; align-items:center; z-index:9999; }
     .login-box { background:#fff; padding:40px; border-radius:16px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.5); width: 320px; }
     .login-box input { width:90%; padding:12px; margin:15px 0; border:2px solid #e5e7eb; border-radius:8px; font-size:16px; outline:none; }
     .login-box button { width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-size:16px; cursor:pointer; font-weight:bold; }
     
-    /* DASHBOARD LAYOUT */
-    #dashboard { display:none; } /* Hidden until login */
-    .header { display:flex; align-items:center; background:#fff; padding:15px 30px; box-shadow:0 2px 5px rgba(0,0,0,0.05); }
-    .header h2 { margin:0; margin-right:40px; color:#111827; }
+    #dashboard { display:none; } 
+    .header { display:flex; align-items:center; justify-content: space-between; background:#fff; padding:15px 30px; box-shadow:0 2px 5px rgba(0,0,0,0.05); }
+    .header-left { display:flex; align-items:center; }
+    .header-left h2 { margin:0; margin-right:40px; color:#111827; }
     .nav-btn { background:none; border:none; padding:10px 20px; font-size:16px; font-weight:600; cursor:pointer; color:#6b7280; border-bottom:3px solid transparent; transition:0.2s; }
     .nav-btn.active { color:var(--primary); border-bottom-color:var(--primary); }
+    
+    .sync-status { font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 20px; display:flex; align-items:center; gap:6px; }
+    .sync-offline { background: #fef3c7; color: #b45309; }
+    .sync-live { background: #dcfce7; color: #166534; }
+    .sync-loading { background: #e0e7ff; color: #3730a3; }
     
     .hero { padding:25px 30px; background:linear-gradient(135deg,#0f9d58,#1a73e8); color:white; }
     .hero h1 { margin:0 0 5px 0; font-size:24px; }
@@ -26,44 +30,44 @@
     
     .container { padding:25px 30px; }
     .toolbar { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px; align-items: center; }
-    .control-input { padding:10px 14px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; min-width:200px; }
-    button.action-btn { padding:10px 16px; border:none; border-radius:8px; color:#fff; font-weight:bold; cursor:pointer; font-size:13px; }
+    .control-input { padding:10px 14px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; min-width:200px; outline:none; }
+    button.action-btn { padding:10px 16px; border:none; border-radius:8px; color:#fff; font-weight:bold; cursor:pointer; font-size:13px; transition:0.2s;}
+    button.action-btn:hover { opacity:0.9; }
     .btn-blue { background:var(--primary); } .btn-red { background:var(--danger); } .btn-green { background:var(--success); }
     
-    /* EXCEL LIKE SEARCHABLE DROPDOWN */
-    .custom-select-wrapper { position: relative; width: 300px; }
+    .custom-select-wrapper { position: relative; width: 280px; }
     .custom-select-input { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none; background: #fff url('data:image/svg+xml;utf8,<svg fill="gray" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center; cursor: pointer; }
-    .custom-select-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 5px; }
-    .custom-select-list input { width: 90%; margin: 10px 5%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+    .custom-select-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-top: 5px; }
+    .custom-select-list input { width: 90%; margin: 10px 5%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; outline:none;}
     .custom-option { padding: 10px 15px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #f3f4f6; }
-    .custom-option:hover { background: #f3f4f6; }
+    .custom-option:hover { background: #f3f4f6; color:var(--primary); font-weight:600;}
     
-    /* STATS CARDS */
-    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:20px; }
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:15px; margin-bottom:20px; }
     .stat-card { background:#fff; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.04); border-left: 4px solid var(--primary); }
-    .stat-val { font-size:28px; font-weight:800; color:#111827; }
-    .stat-label { font-size:13px; color:#6b7280; text-transform:uppercase; font-weight:600; margin-top:5px; }
+    .stat-val { font-size:26px; font-weight:800; color:#111827; }
+    .stat-label { font-size:12px; color:#6b7280; text-transform:uppercase; font-weight:700; margin-top:5px; }
     
-    /* STATUS & PROGRESS */
-    .status-panel { background:#fff; padding:15px 20px; border-radius:12px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.04); font-size:14px;}
-    .progress-bar { height:8px; background:#e5e7eb; border-radius:10px; margin-top:10px; overflow:hidden; }
+    .status-panel { background:#fff; padding:15px 20px; border-radius:12px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.04); font-size:14px; display:flex; justify-content:space-between; align-items:center;}
+    .progress-wrapper { flex-grow:1; margin-left:20px; display:none; }
+    .progress-bar { height:8px; background:#e5e7eb; border-radius:10px; overflow:hidden; }
     .progress-fill { height:100%; width:0%; background:var(--primary); transition:width 0.3s ease; }
     
-    /* TABLE STYLES */
-    .table-container { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.04); overflow-x:auto; }
-    table { width:100%; border-collapse:collapse; }
-    th { background:#f8fafc; padding:12px 15px; text-align:left; font-size:12px; color:#6b7280; text-transform:uppercase; border-bottom:2px solid #e5e7eb; }
+    .table-container { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.04); overflow-x:auto; max-height: 60vh; overflow-y:auto;}
+    table { width:100%; border-collapse:collapse; white-space:nowrap; }
+    th { background:#f8fafc; padding:12px 15px; text-align:left; font-size:12px; color:#6b7280; text-transform:uppercase; border-bottom:2px solid #e5e7eb; position:sticky; top:0; z-index:10;}
     td { padding:12px 15px; font-size:13px; border-bottom:1px solid #e5e7eb; color:#374151; }
     tr:hover { background:#f9fafb; }
     .badge { padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; background:#e0e7ff; color:#3730a3; }
     .badge.admin { background:#fee2e2; color:#991b1b; }
+    .badge.viewer { background:#dcfce7; color:#166534; }
+    .type-badge { font-size:11px; color:#6b7280; background:#f3f4f6; padding:3px 6px; border-radius:4px; border:1px solid #d1d5db;}
     .link { color:var(--primary); text-decoration:none; font-weight:600; }
     .link:hover { text-decoration:underline; }
+    .owner-sub { display:block; font-size:11px; color:#9ca3af; margin-top:2px;}
   </style>
 </head>
 <body>
 
-<!-- PASSWORD SCREEN -->
 <div id="loginScreen">
   <div class="login-box">
     <h2>🔒 Secure Access</h2>
@@ -74,12 +78,14 @@
   </div>
 </div>
 
-<!-- MAIN DASHBOARD -->
 <div id="dashboard">
   <div class="header">
-    <h2>📊 Laser Access Control</h2>
-    <button class="nav-btn active" id="nav-google" onclick="switchPlatform('google')">Google Sheets</button>
-    <button class="nav-btn" id="nav-smartsheet" onclick="switchPlatform('smartsheet')">Smartsheet</button>
+    <div class="header-left">
+      <h2>📊 Laser Access Control</h2>
+      <button class="nav-btn active" id="nav-google" onclick="switchPlatform('google')">Google Sheets</button>
+      <button class="nav-btn" id="nav-smartsheet" onclick="switchPlatform('smartsheet')">Smartsheet</button>
+    </div>
+    <div id="syncIndicator" class="sync-status sync-loading">⏳ Initializing...</div>
   </div>
 
   <div class="hero" id="heroBanner">
@@ -89,9 +95,8 @@
 
   <div class="container">
     <div class="toolbar">
-      <input type="text" class="control-input" id="search" placeholder="Search user, email, or role..." onkeyup="render()">
+      <input type="text" class="control-input" id="search" placeholder="Search user, email, role or owner..." onkeyup="render()">
       
-      <!-- EXCEL LIKE DROPDOWN -->
       <div class="custom-select-wrapper" id="sheetFilterWrapper">
         <input type="text" class="custom-select-input" id="sheetFilterDisplay" readonly placeholder="Filter by Sheet..." onclick="toggleDropdown()">
         <div class="custom-select-list" id="sheetDropdown">
@@ -116,12 +121,15 @@
       <div class="stat-card"><div class="stat-val" id="statSheets">0</div><div class="stat-label">Total Files Monitored</div></div>
       <div class="stat-card"><div class="stat-val" id="statRows">0</div><div class="stat-label">Total Permissions</div></div>
       <div class="stat-card"><div class="stat-val" id="statUsers">0</div><div class="stat-label">Unique Users</div></div>
-      <div class="stat-card" style="border-left-color:var(--danger)"><div class="stat-val" id="statAdmins">0</div><div class="stat-label">Admins / Owners</div></div>
+      <div class="stat-card"><div class="stat-val" id="statEditors">0</div><div class="stat-label">Total Editors</div></div>
+      <div class="stat-card" style="border-left-color:var(--warning)"><div class="stat-val" id="statExternal">0</div><div class="stat-label">External Accounts</div></div>
     </div>
 
     <div class="status-panel">
-      <strong>Status:</strong> <span id="statusText">Awaiting input...</span>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div><strong>Task:</strong> <span id="statusText">Ready</span></div>
+      <div class="progress-wrapper" id="progressWrapper">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
     </div>
 
     <div class="table-container">
@@ -129,15 +137,16 @@
         <thead>
           <tr>
             <th>Document Name</th>
-            <th>User Info</th>
+            <th>File Owner</th>
+            <th>Shared With (User)</th>
             <th>Email Address</th>
             <th>Access Role</th>
+            <th>User Type</th>
+            <th>Last Scanned</th>
             <th>Action</th>
           </tr>
         </thead>
-        <tbody id="tableBody">
-          <!-- Rows injected via JS -->
-        </tbody>
+        <tbody id="tableBody"></tbody>
       </table>
     </div>
   </div>
@@ -147,7 +156,7 @@
 // ==========================================
 // 1. SET YOUR APPS SCRIPT WEB APP URL HERE
 // ==========================================
-const API_URL = "https://script.google.com/macros/s/AKfycbxFFTaSgoEOgubYrOI_6eDHyVhRqOCgU_wh2V22RG_boNcxZ1t0Q6Du3zctujDOIWM4/exec"; 
+const API_URL = "https://script.google.com/macros/s/AKfycbzRlLYuexSgL9wLLq3YekLZcRTS_o-NXlAyIr49yZBCkd_lzg3s58N83wSdyDVBX-Jw/exec"; 
 
 let platform = "google";
 let rawData = { google: [], smartsheet: [] };
@@ -160,33 +169,89 @@ function checkPassword() {
   if(pass === "Laser") {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
-    loadData(); // Load data only after login
+    initializeData(); 
   } else {
     document.getElementById('loginError').style.display = 'block';
   }
 }
 document.getElementById('passInput').addEventListener('keypress', function(e) { if(e.key === 'Enter') checkPassword(); });
 
-// --- DATA FETCHING (REST API) ---
-async function loadData() {
-  setBusy(true, "Connecting to Backend Database...");
-  try {
-    const res = await fetch(`${API_URL}?action=load`);
-    const data = await res.json();
-    if(data.status === "success") {
-      rawData.google = data.googleRows || [];
-      rawData.smartsheet = data.smartsheetRows || [];
-      setBusy(false, "Data loaded successfully ✅");
-      switchPlatform('google');
-    } else {
-      setBusy(false, "Error: " + data.message);
-    }
-  } catch(err) { setBusy(false, "Network Error: " + err.message); }
+// --- SMART CACHING & BATCH FETCHING LOGIC ---
+async function initializeData() {
+  // Step 1: Check Local Storage (Instant Load)
+  const cachedData = localStorage.getItem("laserDashboardData");
+  if(cachedData) {
+    try {
+      rawData = JSON.parse(cachedData);
+      setSyncStatus('offline', '⚡ Loaded from Cache');
+      switchPlatform(platform); 
+    } catch(e) {}
+  }
+
+  // Step 2: Fetch Fresh Data in Batches (Background)
+  await fetchAllFreshData();
 }
 
+async function fetchBatchData(platformToLoad) {
+  let startRow = 2;
+  const limit = 500; // Batch size matching backend
+  let allLoaded = false;
+  let accumulatedRows = [];
+
+  setSyncStatus('loading', `⏳ Fetching ${platformToLoad === 'google' ? 'Google' : 'Smartsheet'} DB...`);
+
+  while (!allLoaded) {
+    try {
+      const res = await fetch(`${API_URL}?action=loadBatch&platform=${platformToLoad}&start=${startRow}&limit=${limit}`);
+      const data = await res.json();
+
+      if (data.status === "success") {
+        accumulatedRows = accumulatedRows.concat(data.rows);
+        startRow = data.nextStart;
+        allLoaded = data.done;
+        setSyncStatus('loading', `⏳ DB Load (${platformToLoad}): ${accumulatedRows.length} / ${data.total}`);
+      } else {
+        console.error("Backend Error:", data.message);
+        break; // Stop loop on error
+      }
+    } catch (err) {
+      console.error("Network Error:", err);
+      break;
+    }
+  }
+  return accumulatedRows;
+}
+
+async function fetchAllFreshData() {
+  // Fetch both sequentially to avoid overwhelming Apps Script
+  const googleData = await fetchBatchData('google');
+  const smartsheetData = await fetchBatchData('smartsheet');
+
+  if(googleData.length > 0 || smartsheetData.length > 0) {
+    rawData.google = googleData.length > 0 ? googleData : rawData.google;
+    rawData.smartsheet = smartsheetData.length > 0 ? smartsheetData : rawData.smartsheet;
+    
+    // Update Cache & UI
+    localStorage.setItem("laserDashboardData", JSON.stringify(rawData));
+    setSyncStatus('live', '🟢 Live DB Connected');
+    populateSheetDropdown();
+    render(); 
+  } else {
+    setSyncStatus('offline', '⚠️ Working Offline (Check Network)');
+  }
+}
+
+function setSyncStatus(type, text) {
+  const ind = document.getElementById("syncIndicator");
+  ind.className = `sync-status sync-${type}`;
+  ind.innerHTML = text;
+}
+
+// --- SCANNING BATCH LOGIC ---
 async function startScan(full) {
   if(full && !confirm("Warning: A full rescan deletes previous logs. Continue?")) return;
   setBusy(true, `Starting ${platform} scan queue...`);
+  document.getElementById("progressWrapper").style.display = "block";
   document.getElementById("progressFill").style.width = "0%";
   
   try {
@@ -213,12 +278,18 @@ async function processBatch() {
     
     let pct = data.total ? Math.round((data.processed / data.total) * 100) : 100;
     document.getElementById("progressFill").style.width = pct + "%";
+    
+    localStorage.setItem("laserDashboardData", JSON.stringify(rawData));
     render();
 
-    if(data.done) { setBusy(false, "Scan Completed ✅"); return; }
+    if(data.done) { 
+      setBusy(false, "Scan Completed ✅"); 
+      document.getElementById("progressWrapper").style.display = "none";
+      return; 
+    }
     
     setBusy(true, `Scanning files... ${data.processed} / ${data.total}`);
-    setTimeout(processBatch, 800); // Wait 0.8s before next batch
+    setTimeout(processBatch, 800); 
   } catch(err) { setBusy(false, "Batch error: " + err.message); }
 }
 
@@ -249,37 +320,52 @@ function render() {
   const rows = getCurrentRows();
 
   filteredRows = rows.filter(r => {
-    const textMatch = [r.sheetName, r.userName, r.userEmail, r.role].some(v => String(v||"").toLowerCase().includes(q));
+    const textMatch = [r.sheetName, r.userName, r.userEmail, r.role, r.ownerName].some(v => String(v||"").toLowerCase().includes(q));
     const roleMatch = !role || String(r.role||"").toLowerCase().includes(role);
     const sheetMatch = !selectedSheet || r.sheetName === selectedSheet;
     return textMatch && roleMatch && sheetMatch;
   });
 
-  // Update Stats
+  const uniqueEmails = filteredRows.map(r=>r.userEmail).filter(Boolean);
+  
   document.getElementById("statSheets").innerText = new Set(filteredRows.map(r=>r.fileId)).size;
   document.getElementById("statRows").innerText = filteredRows.length;
-  document.getElementById("statUsers").innerText = new Set(filteredRows.map(r=>r.userEmail).filter(Boolean)).size;
-  document.getElementById("statAdmins").innerText = filteredRows.filter(r=>String(r.role).toLowerCase().includes('owner') || String(r.role).toLowerCase().includes('admin')).length;
+  document.getElementById("statUsers").innerText = new Set(uniqueEmails).size;
+  document.getElementById("statEditors").innerText = filteredRows.filter(r=>String(r.role).toLowerCase() === 'writer' || String(r.role).toLowerCase() === 'editor').length;
+  
+  document.getElementById("statExternal").innerText = uniqueEmails.filter(e => e.includes('@gmail.com') || e.includes('@yahoo')).length;
 
-  // Render Table
   const tbody = document.getElementById("tableBody");
   if(!filteredRows.length) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:#6b7280;">No records found. Try adjusting filters or run a scan.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#6b7280;">No records found. Try adjusting filters or run a scan.</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = filteredRows.map(r => {
-    let roleClass = String(r.role).toLowerCase().includes('owner') ? 'badge admin' : 'badge';
+  // Slice added for rendering speed if table gets too huge visually (keeps DOM light)
+  const displayRows = filteredRows.slice(0, 500); 
+
+  tbody.innerHTML = displayRows.map(r => {
+    let roleClass = 'badge';
+    if(String(r.role).toLowerCase().includes('owner')) roleClass = 'badge admin';
+    if(String(r.role).toLowerCase().includes('reader')) roleClass = 'badge viewer';
+    
     return `
       <tr>
         <td><strong>${esc(r.sheetName)}</strong></td>
+        <td>${esc(r.ownerName||"System")} <span class="owner-sub">${esc(r.ownerEmail||"")}</span></td>
         <td>${esc(r.userName||"Unknown")}</td>
         <td>${r.userEmail ? `<a href="mailto:${esc(r.userEmail)}" class="link">${esc(r.userEmail)}</a>` : '-'}</td>
         <td><span class="${roleClass}">${esc(r.role||"-").toUpperCase()}</span></td>
-        <td><a target="_blank" href="${esc(r.sheetUrl)}" class="link">Open File ↗</a></td>
+        <td><span class="type-badge">${esc(r.type||"user").toUpperCase()}</span></td>
+        <td style="font-size:11px; color:#6b7280;">${esc(r.scannedAt||"-")}</td>
+        <td><a target="_blank" href="${esc(r.sheetUrl)}" class="link">Open ↗</a></td>
       </tr>
     `;
   }).join("");
+  
+  if(filteredRows.length > 500) {
+     tbody.innerHTML += `<tr><td colspan="8" style="text-align:center; padding:15px; color:#6b7280; font-size:12px;">Showing top 500 rows. Use export or search for more...</td></tr>`;
+  }
 }
 
 // --- EXCEL LIKE DROPDOWN LOGIC ---
@@ -310,17 +396,17 @@ function selectSheet(sheetName) {
   render();
 }
 
-// Close dropdown if clicked outside
 document.addEventListener('click', function(e) {
-  if(!document.getElementById('sheetFilterWrapper').contains(e.target)) {
+  const wrapper = document.getElementById('sheetFilterWrapper');
+  if(wrapper && !wrapper.contains(e.target)) {
     document.getElementById('sheetDropdown').style.display = 'none';
   }
 });
 
 // --- UTILITIES ---
 function downloadCSV() {
-  const rows = [["Platform", "File Name", "User Name", "User Email", "Role", "URL"]];
-  filteredRows.forEach(r => rows.push([platform, r.sheetName, r.userName, r.userEmail, r.role, r.sheetUrl]));
+  const rows = [["Platform", "Document Name", "Owner Name", "Owner Email", "User Name", "User Email", "Role", "User Type", "Scanned At", "URL"]];
+  filteredRows.forEach(r => rows.push([platform, r.sheetName, r.ownerName, r.ownerEmail, r.userName, r.userEmail, r.role, r.type, r.scannedAt, r.sheetUrl]));
   const csv = rows.map(row => row.map(v => '"'+String(v||"").replace(/"/g,'""')+'"').join(",")).join("\n");
   const blob = new Blob([csv], {type:"text/csv"});
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `${platform}_access_report.csv`; a.click();
