@@ -1,107 +1,156 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Google Sheets Sharing Live Dashboard</title>
-  <style>
-    body{margin:0;font-family:Arial;background:#eef4fb;color:#111827}
-    .hero{padding:28px;background:linear-gradient(135deg,#0f9d58,#1a73e8);color:white;border-radius:0 0 28px 28px}
-    .hero h1{margin:0;font-size:30px}.hero p{margin:8px 0 0}
-    .wrap{padding:22px}
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
-    input,select,button{padding:11px 13px;border-radius:10px;border:1px solid #d1d5db;font-size:14px}
-    input{min-width:280px}button{border:0;color:white;font-weight:700;cursor:pointer}
-    .blue{background:#1a73e8}.green{background:#0f9d58}.orange{background:#f29900}.dark{background:#374151}.red{background:#dc2626}
-    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px}
-    .stat,.panel,.sheet-card{background:white;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.08)}
-    .stat{padding:18px}.num{font-size:28px;font-weight:900;color:#1a73e8}.label{font-size:13px;color:#6b7280}
-    .panel{padding:16px;margin-bottom:18px}
-    .progress{height:14px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:10px}
-    .fill{height:100%;width:0%;background:linear-gradient(90deg,#0f9d58,#1a73e8);transition:.3s}
-    .tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-    .tab{background:white;color:#111;border:1px solid #d1d5db}.tab.active{background:#1a73e8;color:white}
-    table{width:100%;border-collapse:collapse;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.08)}
-    th,td{padding:10px;border-bottom:1px solid #edf2f7;text-align:left;font-size:13px}
-    th{background:#f8fafc;text-transform:uppercase;font-size:12px}
-    tr:hover{background:#f9fafb}a{color:#1a73e8}
-    .badge{display:inline-block;padding:5px 9px;background:#e8f0fe;color:#174ea6;border-radius:999px;font-size:12px;font-weight:800}
-    .sheet-card{margin-bottom:16px;overflow:hidden}.sheet-head{padding:16px;background:#f8fafc;border-bottom:1px solid #e5e7eb}
-    .sheet-title{font-size:18px;font-weight:900}.sheet-title a{text-decoration:none}
-    .meta,.small{color:#6b7280;font-size:12px}
-    .empty{background:white;border-radius:16px;padding:28px;text-align:center;color:#6b7280;box-shadow:0 4px 14px rgba(0,0,0,.08)}
-    .logs{max-height:180px;overflow:auto;font-size:12px;background:#111827;color:#d1d5db;border-radius:12px;padding:12px}
-  </style>
+<meta charset="UTF-8">
+<title>Access Control Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{margin:0;font-family:Arial;background:#eef4fb;color:#111827}
+.login{position:fixed;inset:0;background:linear-gradient(135deg,#0f9d58,#1a73e8);display:flex;align-items:center;justify-content:center;z-index:9999}
+.loginbox{background:white;padding:30px;border-radius:22px;width:340px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.loginbox h2{margin-top:0}
+.loginbox input{width:100%;box-sizing:border-box;margin-bottom:12px}
+.hero{padding:28px;background:linear-gradient(135deg,#0f9d58,#1a73e8);color:white;border-radius:0 0 28px 28px}
+.hero h1{margin:0;font-size:30px}.hero p{margin:8px 0 0}
+.wrap{padding:22px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+input,select,button{padding:11px 13px;border-radius:10px;border:1px solid #d1d5db;font-size:14px}
+input{min-width:260px}
+button{border:0;color:white;font-weight:700;cursor:pointer}
+.blue{background:#1a73e8}.green{background:#0f9d58}.orange{background:#f29900}.dark{background:#374151}.red{background:#dc2626}.purple{background:#7c3aed}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px}
+.stat,.panel,.sheet-card{background:white;border-radius:18px;box-shadow:0 5px 16px rgba(0,0,0,.08)}
+.stat{padding:18px}.num{font-size:30px;font-weight:900;color:#1a73e8}.label{font-size:13px;color:#6b7280}
+.panel{padding:16px;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.tab{background:white;color:#111;border:1px solid #d1d5db}.tab.active{background:#1a73e8;color:white}
+table{width:100%;border-collapse:collapse;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+th,td{padding:10px;border-bottom:1px solid #edf2f7;text-align:left;font-size:13px}
+th{background:#f8fafc;text-transform:uppercase;font-size:12px}
+tr:hover{background:#f9fafb}a{color:#1a73e8}
+.badge{display:inline-block;padding:5px 9px;background:#e8f0fe;color:#174ea6;border-radius:999px;font-size:12px;font-weight:800}
+.sheet-card{margin-bottom:16px;overflow:hidden}
+.sheet-head{padding:16px;background:#f8fafc;border-bottom:1px solid #e5e7eb}
+.sheet-title{font-size:18px;font-weight:900}.sheet-title a{text-decoration:none}
+.meta,.small{color:#6b7280;font-size:12px}
+.empty{background:white;border-radius:16px;padding:28px;text-align:center;color:#6b7280}
+.logs{max-height:180px;overflow:auto;font-size:12px;background:#111827;color:#d1d5db;border-radius:12px;padding:12px}
+</style>
 </head>
 
 <body>
+
+<div id="login" class="login">
+  <div class="loginbox">
+    <h2>🔐 Dashboard Login</h2>
+    <p class="small">Password required</p>
+    <input id="pass" type="password" placeholder="Enter password">
+    <button class="blue" onclick="login()">Open Dashboard</button>
+  </div>
+</div>
+
 <div class="hero">
-  <h1>📊 Google Sheets Sharing Live Dashboard</h1>
-  <p>GitHub hosted dashboard + Apps Script backend + live Google Sheet database</p>
+  <h1>📊 Access Control Dashboard</h1>
+  <p>Google Sheets + Smartsheet live access monitoring</p>
 </div>
 
 <div class="wrap">
-  <div class="toolbar">
-    <input id="search" placeholder="Search user, email, role..." onkeyup="render()">
-    <select id="sheetFilter" onchange="render()"><option value="">All Sheets</option></select>
-    <select id="roleFilter" onchange="render()">
-      <option value="">All Roles</option>
-      <option value="owner">Owner</option>
-      <option value="writer">Writer / Editor</option>
-      <option value="reader">Reader / Viewer</option>
-      <option value="commenter">Commenter</option>
-    </select>
-    <button class="blue" onclick="loadData()">🔄 Refresh View</button>
-    <button class="green" onclick="startScan(false)">▶ Scan / Update</button>
-    <button class="red" onclick="startScan(true)">♻ Full Rescan</button>
-    <button class="orange" onclick="downloadCSV()">⬇ CSV</button>
-    <button class="dark" onclick="bulkEmail()">📧 Bulk Gmail</button>
-  </div>
 
-  <div class="cards">
-    <div class="stat"><div class="num" id="totalSheets">0</div><div class="label">Total Sheets</div></div>
-    <div class="stat"><div class="num" id="rowsCount">0</div><div class="label">Permission Rows</div></div>
-    <div class="stat"><div class="num" id="uniqueEmails">0</div><div class="label">Unique Emails</div></div>
-    <div class="stat"><div class="num" id="editors">0</div><div class="label">Editors</div></div>
-    <div class="stat"><div class="num" id="viewers">0</div><div class="label">Viewers</div></div>
-    <div class="stat"><div class="num" id="commenters">0</div><div class="label">Commenters</div></div>
-  </div>
+<div class="toolbar">
+  <button class="tab active" id="googleTab" onclick="setSource('google')">📄 Google Sheets</button>
+  <button class="tab" id="smartTab" onclick="setSource('smart')">📋 Smartsheet</button>
 
+  <input id="search" placeholder="Search user, email, role..." onkeyup="render()">
+
+  <select id="sheetFilter" onchange="render()">
+    <option value="">All Sheets</option>
+  </select>
+
+  <input id="sheetSearch" placeholder="Search sheet dropdown..." onkeyup="fillSheetFilter()">
+
+  <select id="roleFilter" onchange="render()">
+    <option value="">All Roles / Access</option>
+  </select>
+</div>
+
+<div class="toolbar">
+  <button class="green" onclick="scanCurrent()">▶ Scan / Update</button>
+  <button class="red" onclick="fullCurrent()">♻ Full Rescan</button>
+  <button class="blue" onclick="loadData()">🔄 Refresh</button>
+  <button class="orange" onclick="downloadCSV()">⬇ CSV</button>
+  <button class="dark" onclick="bulkEmail()">📧 Bulk Gmail</button>
+  <button class="purple" onclick="openBackend()">📥 Open Backend</button>
+</div>
+
+<div class="cards">
+  <div class="stat"><div class="num" id="totalSheets">0</div><div class="label">Total Sheets</div></div>
+  <div class="stat"><div class="num" id="rowsCount">0</div><div class="label">Access Rows</div></div>
+  <div class="stat"><div class="num" id="uniqueEmails">0</div><div class="label">Unique Emails</div></div>
+  <div class="stat"><div class="num" id="editors">0</div><div class="label">Editors/Admin</div></div>
+  <div class="stat"><div class="num" id="viewers">0</div><div class="label">Viewers</div></div>
+  <div class="stat"><div class="num" id="others">0</div><div class="label">Others</div></div>
+</div>
+
+<div class="grid">
   <div class="panel">
-    <b id="statusText">Loading...</b>
-    <div class="small" id="backendText"></div>
-    <div class="progress"><div class="fill" id="progressFill"></div></div>
+    <b>Access Distribution</b>
+    <canvas id="pieChart" height="160"></canvas>
   </div>
-
   <div class="panel">
     <b>Live Logs</b>
-    <div class="logs" id="logs">Loading logs...</div>
+    <div class="logs" id="logs">Loading...</div>
   </div>
+</div>
 
-  <div class="tabs">
-    <button class="tab active" id="groupBtn" onclick="setView('group')">📁 Group by Sheet</button>
-    <button class="tab" id="tableBtn" onclick="setView('table')">📋 Table View</button>
-  </div>
+<div class="tabs">
+  <button class="tab active" id="groupBtn" onclick="setView('group')">📁 Group View</button>
+  <button class="tab" id="tableBtn" onclick="setView('table')">📋 Table View</button>
+</div>
 
-  <div id="content"></div>
+<div id="content"></div>
+
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxa9yl3gGYMRLyxT7-z6x7F1KN72QvzQv5LsBimOpewuW_Crm_A-F-FYNQu32XpxoUg/exec";
-const ADMIN_TOKEN = "12345";
+const API_URL = "https://script.google.com/macros/s/AKfycbyyUhwWcGLbNeNc30mfG7_i7O5bv6TmVy-miPFB9ZQDvw-inXCkEHW9a4ABPhWu2sV1/exec";
+const ADMIN_TOKEN = "Samrat@2907";
+const DASHBOARD_PASSWORD = "Samrat";
 
+let googleRows = [];
+let smartRows = [];
 let allRows = [];
 let filteredRows = [];
+let currentSource = "google";
 let viewMode = "group";
 let backendUrl = "";
+let pieChart = null;
 
-function jsonp(action, params = {}) {
-  return new Promise((resolve, reject) => {
-    const cb = "cb_" + Date.now() + "_" + Math.floor(Math.random() * 99999);
+function login(){
+  if(document.getElementById("pass").value === DASHBOARD_PASSWORD){
+    sessionStorage.setItem("accessDashboardLogin","yes");
+    document.getElementById("login").style.display = "none";
+    loadData();
+  } else {
+    alert("Wrong password");
+  }
+}
+
+if(sessionStorage.getItem("accessDashboardLogin") === "yes"){
+  document.getElementById("login").style.display = "none";
+  loadData();
+}
+
+function jsonp(action, params={}){
+  return new Promise((resolve,reject)=>{
+    const cb = "cb_" + Date.now() + "_" + Math.floor(Math.random()*99999);
     params.action = action;
     params.callback = cb;
 
-    const url = API_URL + "?" + new URLSearchParams(params).toString();
     const script = document.createElement("script");
+    script.src = API_URL + "?" + new URLSearchParams(params).toString();
 
     window[cb] = data => {
       delete window[cb];
@@ -109,93 +158,57 @@ function jsonp(action, params = {}) {
       resolve(data);
     };
 
-    script.onerror = () => {
-      delete window[cb];
-      script.remove();
-      reject(new Error("API load failed"));
-    };
-
-    script.src = url;
+    script.onerror = () => reject(new Error("API failed"));
     document.body.appendChild(script);
   });
 }
 
 async function loadData(){
-  document.getElementById("statusText").innerText = "Loading live backend data...";
   const res = await jsonp("data");
+  if(!res.ok){ alert(res.error); return; }
 
-  if(!res.ok){
-    alert(res.error || "Backend not ready");
-    return;
-  }
-
-  allRows = res.rows || [];
+  googleRows = res.googleRows || [];
+  smartRows = res.smartRows || [];
   backendUrl = res.backendUrl || "";
-  document.getElementById("backendText").innerHTML = backendUrl ? "Backend: <a target='_blank' href='"+backendUrl+"'>Open Google Sheet Database</a>" : "";
 
+  renderLogs(res.logs || []);
+  setSource(currentSource, true);
+}
+
+function setSource(source, silent){
+  currentSource = source;
+  allRows = source === "google" ? googleRows : smartRows;
+
+  document.getElementById("googleTab").classList.toggle("active", source === "google");
+  document.getElementById("smartTab").classList.toggle("active", source === "smart");
+
+  fillRoleFilter();
   fillSheetFilter();
   render();
-  renderLogs(res.logs || []);
-  document.getElementById("statusText").innerText = "Live data loaded ✅";
+
+  if(!silent) loadData();
 }
 
-async function loadStatus(){
-  const res = await jsonp("status");
-  if(!res.ok) return;
-
-  const pct = res.total ? Math.round((res.processed / res.total) * 100) : 0;
-  document.getElementById("progressFill").style.width = pct + "%";
-  document.getElementById("statusText").innerText =
-    res.status + " | " + res.processed + " / " + res.total + " | Added: " + res.added + " | Skipped: " + res.skipped;
-}
-
-async function loadLogs(){
-  const res = await jsonp("logs");
-  if(res.ok) renderLogs(res.logs || []);
-}
-
-async function startScan(full){
-  if(full && !confirm("Full rescan old raw data clear karega. Continue?")) return;
-
-  const res = await jsonp("startScan", {
-    token: ADMIN_TOKEN,
-    full: full ? "true" : "false"
-  });
-
-  if(!res.ok){
-    alert(res.error);
-    return;
-  }
-
-  processBatchLoop();
-}
-
-async function processBatchLoop(){
-  const res = await jsonp("processBatch", {token: ADMIN_TOKEN});
-
-  if(!res.ok){
-    alert(res.error);
-    return;
-  }
-
-  await loadStatus();
-  await loadLogs();
-  await loadData();
-
-  if(!res.done){
-    setTimeout(processBatchLoop, 1200);
-  }
+function fillRoleFilter(){
+  const roles = [...new Set(allRows.map(r=>r.role).filter(Boolean))].sort();
+  let html = '<option value="">All Roles / Access</option>';
+  roles.forEach(r => html += '<option value="'+escAttr(r)+'">'+esc(r)+'</option>');
+  document.getElementById("roleFilter").innerHTML = html;
 }
 
 function fillSheetFilter(){
   const current = document.getElementById("sheetFilter").value;
-  const sheets = [...new Set(allRows.map(r => r.sheetName).filter(Boolean))].sort();
+  const q = document.getElementById("sheetSearch").value.toLowerCase();
+
+  const sheets = [...new Set(allRows.map(r=>r.sheetName).filter(Boolean))]
+    .filter(s => s.toLowerCase().includes(q))
+    .sort();
 
   let html = '<option value="">All Sheets</option>';
   sheets.forEach(s => html += '<option value="'+escAttr(s)+'">'+esc(s)+'</option>');
-
   document.getElementById("sheetFilter").innerHTML = html;
-  document.getElementById("sheetFilter").value = current;
+
+  if(sheets.includes(current)) document.getElementById("sheetFilter").value = current;
 }
 
 function render(){
@@ -203,11 +216,9 @@ function render(){
   const sheet = document.getElementById("sheetFilter").value;
   const role = document.getElementById("roleFilter").value;
 
-  filteredRows = allRows.filter(r => {
+  filteredRows = allRows.filter(r=>{
     const match =
       String(r.sheetName||"").toLowerCase().includes(q) ||
-      String(r.ownerName||"").toLowerCase().includes(q) ||
-      String(r.ownerEmail||"").toLowerCase().includes(q) ||
       String(r.userName||"").toLowerCase().includes(q) ||
       String(r.userEmail||"").toLowerCase().includes(q) ||
       String(r.role||"").toLowerCase().includes(q) ||
@@ -217,16 +228,43 @@ function render(){
   });
 
   updateStats();
+  drawChart();
   viewMode === "table" ? renderTable() : renderGroup();
 }
 
 function updateStats(){
-  document.getElementById("totalSheets").innerText = new Set(filteredRows.map(r=>r.fileId)).size;
+  document.getElementById("totalSheets").innerText = new Set(filteredRows.map(r=>r.fileId || r.sheetId)).size;
   document.getElementById("rowsCount").innerText = filteredRows.length;
   document.getElementById("uniqueEmails").innerText = new Set(filteredRows.map(r=>r.userEmail).filter(Boolean)).size;
-  document.getElementById("editors").innerText = filteredRows.filter(r=>r.role==="writer").length;
-  document.getElementById("viewers").innerText = filteredRows.filter(r=>r.role==="reader").length;
-  document.getElementById("commenters").innerText = filteredRows.filter(r=>r.role==="commenter").length;
+
+  const editorRoles = ["writer","owner","ADMIN","OWNER","EDITOR","EDITOR_SHARE"];
+  const viewerRoles = ["reader","VIEWER"];
+
+  document.getElementById("editors").innerText = filteredRows.filter(r=>editorRoles.includes(r.role)).length;
+  document.getElementById("viewers").innerText = filteredRows.filter(r=>viewerRoles.includes(r.role)).length;
+  document.getElementById("others").innerText = filteredRows.filter(r=>!editorRoles.includes(r.role) && !viewerRoles.includes(r.role)).length;
+}
+
+function drawChart(){
+  const counts = {};
+  filteredRows.forEach(r => counts[r.role || "Unknown"] = (counts[r.role || "Unknown"] || 0) + 1);
+
+  const labels = Object.keys(counts);
+  const data = Object.values(counts);
+
+  if(pieChart) pieChart.destroy();
+
+  pieChart = new Chart(document.getElementById("pieChart"), {
+    type:"doughnut",
+    data:{
+      labels,
+      datasets:[{data}]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{position:"right"}}
+    }
+  });
 }
 
 function renderGroup(){
@@ -236,27 +274,29 @@ function renderGroup(){
   }
 
   const groups = {};
-  filteredRows.forEach(r => {
-    if(!groups[r.fileId]){
-      groups[r.fileId] = {sheetName:r.sheetName, sheetUrl:r.sheetUrl, ownerName:r.ownerName, ownerEmail:r.ownerEmail, rows:[]};
+  filteredRows.forEach(r=>{
+    const id = r.fileId || r.sheetId;
+    if(!groups[id]){
+      groups[id] = {sheetName:r.sheetName,sheetUrl:r.sheetUrl,rows:[]};
     }
-    groups[r.fileId].rows.push(r);
+    groups[id].rows.push(r);
   });
 
   let html = "";
-  Object.values(groups).forEach(g => {
+
+  Object.values(groups).forEach(g=>{
     html += `
-      <div class="sheet-card">
-        <div class="sheet-head">
-          <div class="sheet-title"><a href="${escAttr(g.sheetUrl)}" target="_blank">📄 ${esc(g.sheetName)}</a></div>
-          <div class="meta">Owner: ${esc(g.ownerName)} &lt;${esc(g.ownerEmail)}&gt; | Entries: <b>${g.rows.length}</b></div>
-        </div>
-        <table>
-          <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Type</th><th>Open</th><th>Mail</th></tr></thead>
-          <tbody>
+    <div class="sheet-card">
+      <div class="sheet-head">
+        <div class="sheet-title"><a href="${escAttr(g.sheetUrl)}" target="_blank">📄 ${esc(g.sheetName)}</a></div>
+        <div class="meta">Entries: <b>${g.rows.length}</b></div>
+      </div>
+      <table>
+        <thead><tr><th>User</th><th>Email</th><th>Role / Access</th><th>Type</th><th>Open</th><th>Mail</th></tr></thead>
+        <tbody>
     `;
 
-    g.rows.forEach(r => html += shortRow(r));
+    g.rows.forEach(r=> html += shortRow(r));
     html += "</tbody></table></div>";
   });
 
@@ -270,53 +310,63 @@ function renderTable(){
   }
 
   let html = `
-    <table>
-      <thead><tr><th>Sheet</th><th>Owner</th><th>User</th><th>Email</th><th>Role</th><th>Type</th><th>Open</th><th>Mail</th></tr></thead>
-      <tbody>
+  <table>
+    <thead><tr><th>Sheet</th><th>User</th><th>Email</th><th>Role / Access</th><th>Type</th><th>Open</th><th>Mail</th></tr></thead>
+    <tbody>
   `;
 
-  filteredRows.forEach(r => html += fullRow(r));
+  filteredRows.forEach(r=> html += fullRow(r));
   html += "</tbody></table>";
   document.getElementById("content").innerHTML = html;
 }
 
 function shortRow(r){
   return `
-    <tr>
-      <td>${esc(r.userName || "-")}</td>
-      <td>${r.userEmail ? '<a href="mailto:'+escAttr(r.userEmail)+'">'+esc(r.userEmail)+'</a>' : '-'}</td>
-      <td><span class="badge">${esc(r.role || "-")}</span></td>
-      <td>${esc(r.type || "-")}</td>
-      <td><a target="_blank" href="${escAttr(r.sheetUrl)}">Open</a></td>
-      <td>${r.userEmail ? '<a target="_blank" href="https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(r.userEmail)+'">Mail</a>' : '-'}</td>
-    </tr>
-  `;
+  <tr>
+    <td>${esc(r.userName || "-")}</td>
+    <td>${r.userEmail ? '<a href="mailto:'+escAttr(r.userEmail)+'">'+esc(r.userEmail)+'</a>' : "-"}</td>
+    <td><span class="badge">${esc(r.role || "-")}</span></td>
+    <td>${esc(r.type || "-")}</td>
+    <td>${r.sheetUrl ? '<a target="_blank" href="'+escAttr(r.sheetUrl)+'">Open</a>' : "-"}</td>
+    <td>${r.userEmail ? '<a target="_blank" href="https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(r.userEmail)+'">Mail</a>' : "-"}</td>
+  </tr>`;
 }
 
 function fullRow(r){
   return `
-    <tr>
-      <td>${esc(r.sheetName)}</td>
-      <td>${esc(r.ownerName)}<br><span class="small">${esc(r.ownerEmail)}</span></td>
-      <td>${esc(r.userName || "-")}</td>
-      <td>${r.userEmail ? '<a href="mailto:'+escAttr(r.userEmail)+'">'+esc(r.userEmail)+'</a>' : '-'}</td>
-      <td><span class="badge">${esc(r.role || "-")}</span></td>
-      <td>${esc(r.type || "-")}</td>
-      <td><a target="_blank" href="${escAttr(r.sheetUrl)}">Open</a></td>
-      <td>${r.userEmail ? '<a target="_blank" href="https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(r.userEmail)+'">Mail</a>' : '-'}</td>
-    </tr>
-  `;
+  <tr>
+    <td>${esc(r.sheetName)}</td>
+    ${shortRow(r).replace("<tr>","").replace("</tr>","")}
+  </tr>`;
+}
+
+async function scanCurrent(){
+  const action = currentSource === "google" ? "scanGoogle" : "scanSmart";
+  const res = await jsonp(action,{token:ADMIN_TOKEN});
+  if(!res.ok){ alert(res.error); return; }
+  alert(res.message || "Scan complete");
+  googleRows = res.googleRows || [];
+  smartRows = res.smartRows || [];
+  renderLogs(res.logs || []);
+  setSource(currentSource, true);
+}
+
+async function fullCurrent(){
+  if(!confirm("Full rescan old data clear karega. Continue?")) return;
+  const action = currentSource === "google" ? "fullGoogle" : "fullSmart";
+  const res = await jsonp(action,{token:ADMIN_TOKEN});
+  if(!res.ok){ alert(res.error); return; }
+  alert(res.message || "Full rescan complete");
+  googleRows = res.googleRows || [];
+  smartRows = res.smartRows || [];
+  renderLogs(res.logs || []);
+  setSource(currentSource, true);
 }
 
 function renderLogs(logs){
-  if(!logs.length){
-    document.getElementById("logs").innerHTML = "No logs yet.";
-    return;
-  }
-
-  document.getElementById("logs").innerHTML = logs.reverse().map(l =>
-    "<div>[" + esc(l.time) + "] " + esc(l.log) + "</div>"
-  ).join("");
+  document.getElementById("logs").innerHTML = logs.length
+    ? logs.reverse().map(l=>"<div>[" + esc(l.time) + "] " + esc(l.log) + "</div>").join("")
+    : "No logs yet.";
 }
 
 function setView(mode){
@@ -326,37 +376,36 @@ function setView(mode){
   render();
 }
 
-function downloadCSV(){
-  const rows = [["Sheet Name","Sheet URL","Owner Name","Owner Email","User Name","User Email","Role","Type","Scanned At"]];
-  filteredRows.forEach(r => rows.push([r.sheetName,r.sheetUrl,r.ownerName,r.ownerEmail,r.userName,r.userEmail,r.role,r.type,r.scannedAt]));
+function openBackend(){
+  if(backendUrl) window.open(backendUrl,"_blank");
+  else alert("Backend not ready");
+}
 
-  const csv = rows.map(row => row.map(v => '"' + String(v || "").replace(/"/g,'""') + '"').join(",")).join("\\n");
-  const blob = new Blob([csv], {type:"text/csv"});
+function downloadCSV(){
+  const rows = [["Source","Sheet Name","Sheet URL","User Name","Email","Role","Type","Scanned At"]];
+  filteredRows.forEach(r=>rows.push([currentSource,r.sheetName,r.sheetUrl,r.userName,r.userEmail,r.role,r.type,r.scannedAt]));
+  const csv = rows.map(row=>row.map(v=>'"'+String(v||"").replace(/"/g,'""')+'"').join(",")).join("\\n");
+  const blob = new Blob([csv],{type:"text/csv"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "google_sheets_sharing_report.csv";
+  a.download = currentSource + "_access_report.csv";
   a.click();
   URL.revokeObjectURL(url);
 }
 
 function bulkEmail(){
   const emails = [...new Set(filteredRows.map(r=>r.userEmail).filter(Boolean))];
-  if(!emails.length){alert("No emails found.");return;}
-
-  const subject = encodeURIComponent("Google Sheets Access Review");
-  const body = encodeURIComponent("Hello,\\n\\nPlease review your Google Sheets access.\\n\\nThanks.");
-
-  window.open("https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(emails.join(","))+"&su="+subject+"&body="+body,"_blank");
+  if(!emails.length){alert("No emails found");return;}
+  window.open("https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(emails.join(",")),"_blank");
 }
 
 function esc(t){return String(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
 function escAttr(t){return esc(t);}
 
-loadData();
-setInterval(loadData, 10000);
-setInterval(loadStatus, 5000);
-setInterval(loadLogs, 5000);
+setInterval(()=>{
+  if(sessionStorage.getItem("accessDashboardLogin")==="yes") loadData();
+},15000);
 </script>
 </body>
 </html>
