@@ -1,16 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Access Dashboard</title>
-    <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-        iframe { width: 100%; height: 100%; border: none; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Corporate Access Dashboard</title>
+  <style>
+    :root { --primary: #1a73e8; --success: #0f9d58; --danger: #dc2626; --bg: #f3f4f6; --text: #1f2937; }
+    body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--bg); color:var(--text); }
+    
+    /* LOGIN SCREEN */
+    #loginScreen { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(17,24,39,0.95); display:flex; justify-content:center; align-items:center; z-index:9999; }
+    .login-box { background:#fff; padding:40px; border-radius:16px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.5); width: 320px; }
+    .login-box input { width:90%; padding:12px; margin:15px 0; border:2px solid #e5e7eb; border-radius:8px; font-size:16px; outline:none; }
+    .login-box button { width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-size:16px; cursor:pointer; font-weight:bold; }
+    
+    /* DASHBOARD LAYOUT */
+    #dashboard { display:none; } /* Hidden until login */
+    .header { display:flex; align-items:center; background:#fff; padding:15px 30px; box-shadow:0 2px 5px rgba(0,0,0,0.05); }
+    .header h2 { margin:0; margin-right:40px; color:#111827; }
+    .nav-btn { background:none; border:none; padding:10px 20px; font-size:16px; font-weight:600; cursor:pointer; color:#6b7280; border-bottom:3px solid transparent; transition:0.2s; }
+    .nav-btn.active { color:var(--primary); border-bottom-color:var(--primary); }
+    
+    .hero { padding:25px 30px; background:linear-gradient(135deg,#0f9d58,#1a73e8); color:white; }
+    .hero h1 { margin:0 0 5px 0; font-size:24px; }
+    .smartsheet-hero { background:linear-gradient(135deg,#133e8a,#12b4e6); }
+    
+    .container { padding:25px 30px; }
+    .toolbar { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px; align-items: center; }
+    .control-input { padding:10px 14px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; min-width:200px; }
+    button.action-btn { padding:10px 16px; border:none; border-radius:8px; color:#fff; font-weight:bold; cursor:pointer; font-size:13px; }
+    .btn-blue { background:var(--primary); } .btn-red { background:var(--danger); } .btn-green { background:var(--success); }
+    
+    /* EXCEL LIKE SEARCHABLE DROPDOWN */
+    .custom-select-wrapper { position: relative; width: 300px; }
+    .custom-select-input { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none; background: #fff url('data:image/svg+xml;utf8,<svg fill="gray" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center; cursor: pointer; }
+    .custom-select-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 5px; }
+    .custom-select-list input { width: 90%; margin: 10px 5%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+    .custom-option { padding: 10px 15px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #f3f4f6; }
+    .custom-option:hover { background: #f3f4f6; }
+    
+    /* STATS CARDS */
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:20px; }
+    .stat-card { background:#fff; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.04); border-left: 4px solid var(--primary); }
+    .stat-val { font-size:28px; font-weight:800; color:#111827; }
+    .stat-label { font-size:13px; color:#6b7280; text-transform:uppercase; font-weight:600; margin-top:5px; }
+    
+    /* STATUS & PROGRESS */
+    .status-panel { background:#fff; padding:15px 20px; border-radius:12px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.04); font-size:14px;}
+    .progress-bar { height:8px; background:#e5e7eb; border-radius:10px; margin-top:10px; overflow:hidden; }
+    .progress-fill { height:100%; width:0%; background:var(--primary); transition:width 0.3s ease; }
+    
+    /* TABLE STYLES */
+    .table-container { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.04); overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; }
+    th { background:#f8fafc; padding:12px 15px; text-align:left; font-size:12px; color:#6b7280; text-transform:uppercase; border-bottom:2px solid #e5e7eb; }
+    td { padding:12px 15px; font-size:13px; border-bottom:1px solid #e5e7eb; color:#374151; }
+    tr:hover { background:#f9fafb; }
+    .badge { padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; background:#e0e7ff; color:#3730a3; }
+    .badge.admin { background:#fee2e2; color:#991b1b; }
+    .link { color:var(--primary); text-decoration:none; font-weight:600; }
+    .link:hover { text-decoration:underline; }
+  </style>
 </head>
 <body>
-    <!-- YAHAN APNA WEB APP URL PASTE KAREIN -->
-    <iframe src="https://script.google.com/macros/s/AKfycbwVraFnrdYlrgG5Rwhh9shVmGWQ7Web01NL202PT0MB2bshQjR_6zvtIkA4GSoNjFyL/exec"></iframe>
+
+<!-- PASSWORD SCREEN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h2>🔒 Secure Access</h2>
+    <p style="color:#6b7280;font-size:14px;">Enter dashboard password</p>
+    <input type="password" id="passInput" placeholder="Password...">
+    <button onclick="checkPassword()">Unlock Dashboard</button>
+    <p id="loginError" style="color:red;font-size:13px;display:none;margin-top:10px;">Incorrect Password!</p>
+  </div>
+</div>
+
+<!-- MAIN DASHBOARD -->
+<div id="dashboard">
+  <div class="header">
+    <h2>📊 Laser Access Control</h2>
+    <button class="nav-btn active" id="nav-google" onclick="switchPlatform('google')">Google Sheets</button>
+    <button class="nav-btn" id="nav-smartsheet" onclick="switchPlatform('smartsheet')">Smartsheet</button>
+  </div>
+
+  <div class="hero" id="heroBanner">
+    <h1 id="heroTitle">Google Workspace Permissions</h1>
+    <p style="opacity:0.9; font-size:14px;">Monitor external sharing, internal roles, and sheet ownership in real-time.</p>
+  </div>
+
+  <div class="container">
+    <div class="toolbar">
+      <input type="text" class="control-input" id="search" placeholder="Search user, email, or role..." onkeyup="render()">
+      
+      <!-- EXCEL LIKE DROPDOWN -->
+      <div class="custom-select-wrapper" id="sheetFilterWrapper">
+        <input type="text" class="custom-select-input" id="sheetFilterDisplay" readonly placeholder="Filter by Sheet..." onclick="toggleDropdown()">
+        <div class="custom-select-list" id="sheetDropdown">
+          <input type="text" id="sheetSearchBox" placeholder="Type to search sheets..." onkeyup="filterDropdownList()">
+          <div id="sheetOptions"></div>
+        </div>
+      </div>
+
+      <select class="control-input" id="roleFilter" onchange="render()" style="min-width:150px;">
+        <option value="">All Roles</option>
+        <option value="owner">Owner / Admin</option>
+        <option value="writer">Editor / Writer</option>
+        <option value="reader">Viewer / Reader</option>
+      </select>
+
+      <button class="action-btn btn-blue" onclick="startScan(false)">🔄 Run Quick Scan</button>
+      <button class="action-btn btn-red" onclick="startScan(true)">⚠️ Deep Sync (Rescan)</button>
+      <button class="action-btn btn-green" onclick="downloadCSV()">⬇️ Export Report (CSV)</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val" id="statSheets">0</div><div class="stat-label">Total Files Monitored</div></div>
+      <div class="stat-card"><div class="stat-val" id="statRows">0</div><div class="stat-label">Total Permissions</div></div>
+      <div class="stat-card"><div class="stat-val" id="statUsers">0</div><div class="stat-label">Unique Users</div></div>
+      <div class="stat-card" style="border-left-color:var(--danger)"><div class="stat-val" id="statAdmins">0</div><div class="stat-label">Admins / Owners</div></div>
+    </div>
+
+    <div class="status-panel">
+      <strong>Status:</strong> <span id="statusText">Awaiting input...</span>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Document Name</th>
+            <th>User Info</th>
+            <th>Email Address</th>
+            <th>Access Role</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Rows injected via JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==========================================
+// 1. SET YOUR APPS SCRIPT WEB APP URL HERE
+// ==========================================
+const API_URL = "https://script.google.com/macros/s/AKfycbxFFTaSgoEOgubYrOI_6eDHyVhRqOCgU_wh2V22RG_boNcxZ1t0Q6Du3zctujDOIWM4/exec"; 
+
+let platform = "google";
+let rawData = { google: [], smartsheet: [] };
+let filteredRows = [];
+let selectedSheet = "";
+
+// --- LOGIN LOGIC ---
+function checkPassword() {
+  const pass = document.getElementById('passInput').value;
+  if(pass === "Laser") {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    loadData(); // Load data only after login
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+document.getElementById('passInput').addEventListener('keypress', function(e) { if(e.key === 'Enter') checkPassword(); });
+
+// --- DATA FETCHING (REST API) ---
+async function loadData() {
+  setBusy(true, "Connecting to Backend Database...");
+  try {
+    const res = await fetch(`${API_URL}?action=load`);
+    const data = await res.json();
+    if(data.status === "success") {
+      rawData.google = data.googleRows || [];
+      rawData.smartsheet = data.smartsheetRows || [];
+      setBusy(false, "Data loaded successfully ✅");
+      switchPlatform('google');
+    } else {
+      setBusy(false, "Error: " + data.message);
+    }
+  } catch(err) { setBusy(false, "Network Error: " + err.message); }
+}
+
+async function startScan(full) {
+  if(full && !confirm("Warning: A full rescan deletes previous logs. Continue?")) return;
+  setBusy(true, `Starting ${platform} scan queue...`);
+  document.getElementById("progressFill").style.width = "0%";
+  
+  try {
+    const res = await fetch(`${API_URL}?action=startScan&platform=${platform}&full=${full}`);
+    const data = await res.json();
+    if(platform === 'google') rawData.google = data.rows || [];
+    else rawData.smartsheet = data.rows || [];
+    populateSheetDropdown();
+    render();
+    processBatch();
+  } catch(err) { setBusy(false, "Scan error: " + err.message); }
+}
+
+async function processBatch() {
+  try {
+    const res = await fetch(`${API_URL}?action=processBatch&platform=${platform}`);
+    const data = await res.json();
+    
+    if(data.newRows && data.newRows.length) {
+      if(platform === 'google') rawData.google = rawData.google.concat(data.newRows);
+      else rawData.smartsheet = rawData.smartsheet.concat(data.newRows);
+      populateSheetDropdown();
+    }
+    
+    let pct = data.total ? Math.round((data.processed / data.total) * 100) : 100;
+    document.getElementById("progressFill").style.width = pct + "%";
+    render();
+
+    if(data.done) { setBusy(false, "Scan Completed ✅"); return; }
+    
+    setBusy(true, `Scanning files... ${data.processed} / ${data.total}`);
+    setTimeout(processBatch, 800); // Wait 0.8s before next batch
+  } catch(err) { setBusy(false, "Batch error: " + err.message); }
+}
+
+// --- UI & RENDER LOGIC ---
+function switchPlatform(type) {
+  platform = type;
+  document.getElementById('nav-google').classList.toggle('active', type === 'google');
+  document.getElementById('nav-smartsheet').classList.toggle('active', type === 'smartsheet');
+  
+  const hero = document.getElementById('heroBanner');
+  if(type === 'google') { hero.className = 'hero'; document.getElementById('heroTitle').innerText = "Google Workspace Permissions"; } 
+  else { hero.className = 'hero smartsheet-hero'; document.getElementById('heroTitle').innerText = "Smartsheet Enterprise Access"; }
+  
+  selectedSheet = "";
+  document.getElementById('sheetFilterDisplay').value = "";
+  document.getElementById('search').value = "";
+  document.getElementById('roleFilter').value = "";
+  
+  populateSheetDropdown();
+  render();
+}
+
+function getCurrentRows() { return platform === 'google' ? rawData.google : rawData.smartsheet; }
+
+function render() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const role = document.getElementById("roleFilter").value.toLowerCase();
+  const rows = getCurrentRows();
+
+  filteredRows = rows.filter(r => {
+    const textMatch = [r.sheetName, r.userName, r.userEmail, r.role].some(v => String(v||"").toLowerCase().includes(q));
+    const roleMatch = !role || String(r.role||"").toLowerCase().includes(role);
+    const sheetMatch = !selectedSheet || r.sheetName === selectedSheet;
+    return textMatch && roleMatch && sheetMatch;
+  });
+
+  // Update Stats
+  document.getElementById("statSheets").innerText = new Set(filteredRows.map(r=>r.fileId)).size;
+  document.getElementById("statRows").innerText = filteredRows.length;
+  document.getElementById("statUsers").innerText = new Set(filteredRows.map(r=>r.userEmail).filter(Boolean)).size;
+  document.getElementById("statAdmins").innerText = filteredRows.filter(r=>String(r.role).toLowerCase().includes('owner') || String(r.role).toLowerCase().includes('admin')).length;
+
+  // Render Table
+  const tbody = document.getElementById("tableBody");
+  if(!filteredRows.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:#6b7280;">No records found. Try adjusting filters or run a scan.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filteredRows.map(r => {
+    let roleClass = String(r.role).toLowerCase().includes('owner') ? 'badge admin' : 'badge';
+    return `
+      <tr>
+        <td><strong>${esc(r.sheetName)}</strong></td>
+        <td>${esc(r.userName||"Unknown")}</td>
+        <td>${r.userEmail ? `<a href="mailto:${esc(r.userEmail)}" class="link">${esc(r.userEmail)}</a>` : '-'}</td>
+        <td><span class="${roleClass}">${esc(r.role||"-").toUpperCase()}</span></td>
+        <td><a target="_blank" href="${esc(r.sheetUrl)}" class="link">Open File ↗</a></td>
+      </tr>
+    `;
+  }).join("");
+}
+
+// --- EXCEL LIKE DROPDOWN LOGIC ---
+function toggleDropdown() {
+  const dd = document.getElementById("sheetDropdown");
+  dd.style.display = dd.style.display === "block" ? "none" : "block";
+  if(dd.style.display === "block") document.getElementById("sheetSearchBox").focus();
+}
+
+function populateSheetDropdown() {
+  const rows = getCurrentRows();
+  const sheets = [...new Set(rows.map(r=>r.sheetName).filter(Boolean))].sort();
+  let html = `<div class="custom-option" onclick="selectSheet('')"><b>-- All Sheets --</b></div>`;
+  sheets.forEach(s => html += `<div class="custom-option sheet-item" onclick="selectSheet('${esc(s).replace(/'/g, "\\'")}')">${esc(s)}</div>`);
+  document.getElementById("sheetOptions").innerHTML = html;
+}
+
+function filterDropdownList() {
+  const val = document.getElementById("sheetSearchBox").value.toLowerCase();
+  const items = document.querySelectorAll(".sheet-item");
+  items.forEach(item => item.style.display = item.innerText.toLowerCase().includes(val) ? "block" : "none");
+}
+
+function selectSheet(sheetName) {
+  selectedSheet = sheetName;
+  document.getElementById("sheetFilterDisplay").value = sheetName || "All Sheets";
+  document.getElementById("sheetDropdown").style.display = "none";
+  render();
+}
+
+// Close dropdown if clicked outside
+document.addEventListener('click', function(e) {
+  if(!document.getElementById('sheetFilterWrapper').contains(e.target)) {
+    document.getElementById('sheetDropdown').style.display = 'none';
+  }
+});
+
+// --- UTILITIES ---
+function downloadCSV() {
+  const rows = [["Platform", "File Name", "User Name", "User Email", "Role", "URL"]];
+  filteredRows.forEach(r => rows.push([platform, r.sheetName, r.userName, r.userEmail, r.role, r.sheetUrl]));
+  const csv = rows.map(row => row.map(v => '"'+String(v||"").replace(/"/g,'""')+'"').join(",")).join("\n");
+  const blob = new Blob([csv], {type:"text/csv"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `${platform}_access_report.csv`; a.click();
+}
+
+function setBusy(busy, text) { document.getElementById("statusText").innerText = text; }
+function esc(t) { return String(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;"); }
+</script>
 </body>
 </html>
