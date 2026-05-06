@@ -4,29 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Laser Access Control</title>
-  <!-- BROWSER TAB LOGO (FAVICON) -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
   <style>
     :root { 
       --primary: #2563eb; --primary-hover: #1d4ed8; 
       --success: #10b981; --warning: #f59e0b; --danger: #ef4444; 
       --bg: #f8fafc; --surface: #ffffff; --text: #0f172a; --text-muted: #64748b;
-      --border: #e2e8f0;
+      --border: #cbd5e1; /* Darker border for excel look */
     }
     body { margin:0; font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--text); }
     
-    /* LOGIN SCREEN - GLASSMORPHISM */
+    /* LOGIN SCREEN */
     #loginScreen { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); display:flex; justify-content:center; align-items:center; z-index:9999; }
     .login-box { background:var(--surface); padding:40px; border-radius:20px; text-align:center; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); width: 340px; border: 1px solid rgba(255,255,255,0.1); }
     .login-box h2 { margin-top:0; color:var(--text); font-size: 24px;}
     .login-box input { width:90%; padding:14px; margin:20px 0; border:2px solid var(--border); border-radius:10px; font-size:16px; outline:none; transition:0.3s; }
-    .login-box input:focus { border-color:var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.2); }
-    .login-box button { width:100%; padding:14px; background:linear-gradient(135deg, #2563eb, #1d4ed8); color:white; border:none; border-radius:10px; font-size:16px; cursor:pointer; font-weight:700; transition:0.3s; box-shadow: 0 4px 6px -1px rgba(37,99,235,0.4); }
-    .login-box button:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(37,99,235,0.5); }
+    .login-box button { width:100%; padding:14px; background:linear-gradient(135deg, #2563eb, #1d4ed8); color:white; border:none; border-radius:10px; font-size:16px; cursor:pointer; font-weight:700; transition:0.3s; }
     
     #dashboard { display:none; } 
     
-    /* MODERN HEADER */
+    /* HEADER */
     .header { display:flex; align-items:center; justify-content: space-between; background:var(--surface); padding:15px 35px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;}
     .header-left { display:flex; align-items:center; gap: 30px; }
     .logo-area { display:flex; align-items:center; gap: 10px; font-weight: 800; font-size: 20px; color: var(--text); }
@@ -41,86 +38,86 @@
     
     .hero { padding:30px 35px; background:linear-gradient(135deg, #1e293b, #0f172a); color:white; }
     .hero h1 { margin:0 0 8px 0; font-size:26px; letter-spacing: -0.5px; }
-    .smartsheet-hero { background:linear-gradient(135deg, #075985, #0369a1); }
     
     .container { padding:25px 35px; }
     
-    /* ADVANCED TOOLBAR */
+    /* TOOLBAR & FILTERS */
     .toolbar-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;}
     .search-wrapper { position: relative; width: 400px; }
     .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 18px; height: 18px;}
-    .search-input { width: 100%; padding: 12px 14px 12px 40px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; outline: none; transition: 0.3s; box-sizing: border-box; background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-    .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+    .search-input { width: 100%; padding: 12px 14px 12px 40px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; outline: none; background: var(--surface); }
     
     .action-group { display: flex; gap: 10px; }
-    button.action-btn { padding:10px 18px; border:none; border-radius:8px; color:#fff; font-weight:600; cursor:pointer; font-size:13px; transition:0.2s; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);}
-    button.action-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
+    button.action-btn { padding:10px 18px; border:none; border-radius:8px; color:#fff; font-weight:600; cursor:pointer; font-size:13px; display: flex; align-items: center; gap: 6px;}
     .btn-blue { background:var(--primary); } .btn-red { background:var(--danger); } .btn-green { background:var(--success); }
     
-    .filters { display:flex; gap:15px; margin-bottom:20px; align-items: center;}
+    .filters { display:flex; gap:15px; margin-bottom:20px; align-items: center; flex-wrap: wrap;}
     .control-input { padding:10px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; outline:none; background: var(--surface); cursor: pointer;}
     
-    /* VIEW TOGGLE */
+    /* VIEW TOGGLES */
     .view-toggle { display: flex; background: #e2e8f0; padding: 4px; border-radius: 8px; margin-left: auto;}
     .view-btn { padding: 6px 12px; border: none; background: transparent; cursor: pointer; font-size: 13px; font-weight: 600; border-radius: 6px; color: var(--text-muted); display:flex; align-items:center; gap:5px; transition: 0.2s;}
     .view-btn.active { background: var(--surface); color: var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.1);}
     
     /* EXCEL DROPDOWN */
-    .custom-select-wrapper { position: relative; width: 300px; }
-    .custom-select-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none; background: var(--surface) url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center; cursor: pointer; }
-    .custom-select-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; max-height: 300px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 5px; padding-bottom: 5px;}
-    .custom-select-list input { width: 90%; margin: 10px 5%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; outline:none; background: #f8fafc;}
+    .custom-select-wrapper { position: relative; width: 280px; }
+    .custom-select-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; box-sizing: border-box; cursor: pointer; background: var(--surface); }
+    .custom-select-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; max-height: 300px; overflow-y: auto; z-index: 100; display: none; margin-top: 5px;}
+    .custom-select-list input { width: 90%; margin: 10px 5%; padding: 10px; border: 1px solid var(--border); border-radius: 6px;}
     .custom-option { padding: 10px 15px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #f1f5f9; }
     .custom-option:hover { background: #f1f5f9; color:var(--primary); font-weight:600;}
     
     /* STATS CARDS */
     .stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:20px; margin-bottom:25px; }
-    .stat-card { background:var(--surface); padding:20px 25px; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); position: relative; overflow: hidden;}
+    .stat-card { background:var(--surface); padding:20px 25px; border-radius:12px; border: 1px solid var(--border); position: relative; overflow: hidden;}
     .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary); }
     .stat-card.alert::before { background: var(--warning); }
     .stat-val { font-size:28px; font-weight:800; color:var(--text); margin-bottom: 4px;}
-    .stat-label { font-size:12px; color:var(--text-muted); text-transform:uppercase; font-weight:700; letter-spacing: 0.5px;}
+    .stat-label { font-size:12px; color:var(--text-muted); text-transform:uppercase; font-weight:700;}
     
-    /* TABLE & ACCORDION STYLES */
+    /* EXCEL-LIKE TABLE STYLES */
     .table-header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 14px; color: var(--text-muted); font-weight: 600;}
-    .data-container { background:var(--surface); border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); overflow-x:auto; max-height: 60vh; overflow-y:auto; padding: 10px;}
+    .data-container { background:var(--surface); overflow-x:auto; max-height: 65vh; overflow-y:auto; border: 1px solid var(--border); border-radius: 6px;}
     
-    table { width:100%; border-collapse:collapse; white-space:nowrap; }
-    th { background:#f8fafc; padding:14px 20px; text-align:left; font-size:12px; color:var(--text-muted); text-transform:uppercase; border-bottom:2px solid var(--border); position:sticky; top:0; z-index:10; font-weight: 700; letter-spacing: 0.5px;}
-    td { padding:14px 20px; font-size:14px; border-bottom:1px solid #f1f5f9; color:var(--text); transition: background 0.2s;}
+    table { width:100%; border-collapse:collapse; white-space:nowrap; background: #fff;}
+    th, td { border: 1px solid #cbd5e1; padding: 10px 15px; font-size: 13px;} /* Excel borders */
+    th { background:#f1f5f9; color:#334155; text-transform:uppercase; position:sticky; top:0; z-index:10; font-weight: 700; border-bottom: 2px solid #94a3b8;}
     tr:hover td { background:#f8fafc; }
     
-    /* ACCORDION (SHEET WISE VIEW) */
-    .accordion-item { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; background: var(--surface); overflow: hidden; transition: 0.2s;}
-    .accordion-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #f8fafc; transition: 0.2s; user-select: none;}
-    .accordion-header:hover { background: #f1f5f9; }
-    .accordion-title { font-weight: 700; color: var(--text); font-size: 15px; display:flex; align-items:center; gap:8px;}
-    .accordion-meta { display: flex; gap: 20px; font-size: 13px; color: var(--text-muted); align-items:center;}
-    .accordion-body { display: none; border-top: 1px solid var(--border); padding: 0;}
-    .accordion-item.active { border-color: var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
-    .accordion-item.active .accordion-header { background: #eff6ff; }
+    /* ACCORDION STYLES */
+    .accordion-item { border-bottom: 2px solid var(--border); background: var(--surface); }
+    .accordion-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #e2e8f0; font-weight: bold;}
+    .accordion-body { display: none; }
+    .accordion-item.active .accordion-header { background: #dbeafe; color: var(--primary); border-bottom: 1px solid var(--primary);}
     .accordion-item.active .accordion-body { display: block; }
-    .chevron { transition: transform 0.3s; color: var(--text-muted); }
-    .accordion-item.active .chevron { transform: rotate(180deg); color: var(--primary);}
-    .ext-chip { background: #fef2f2; color: #b91c1c; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; border: 1px solid #fecaca;}
+    
+    /* USER ANALYTICS GRID */
+    .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; padding: 10px; background: #f8fafc;}
+    .user-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s;}
+    .user-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: var(--primary);}
+    .user-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;}
+    .user-avatar { width: 45px; height: 45px; border-radius: 50%; background: #e0e7ff; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;}
+    .user-info { flex-grow: 1; margin-left: 15px; overflow: hidden;}
+    .user-name { font-weight: 800; font-size: 16px; color: var(--text); white-space: nowrap; text-overflow: ellipsis; overflow: hidden;}
+    .user-email { font-size: 12px; color: var(--text-muted); text-decoration: none;}
+    .user-stats-row { display: flex; justify-content: space-between; padding-top: 15px; border-top: 1px dashed var(--border); margin-top: 10px;}
+    .u-stat { text-align: center; }
+    .u-stat-val { font-size: 18px; font-weight: 800; color: var(--text);}
+    .u-stat-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: bold;}
+    .role-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 15px;}
+    .rb-owner { background: #ef4444; } .rb-writer { background: #3b82f6; } .rb-reader { background: #10b981; }
+    .role-legend { display: flex; gap: 10px; font-size: 10px; margin-top: 6px; color: var(--text-muted); justify-content: center;}
+    .rl-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 3px;}
 
     /* BADGES */
-    .badge { padding:5px 10px; border-radius:6px; font-size:11px; font-weight:700; background:#e0e7ff; color:#3730a3; text-transform: uppercase; letter-spacing: 0.5px;}
+    .badge { padding:4px 8px; border-radius:4px; font-size:11px; font-weight:700; background:#e0e7ff; color:#3730a3;}
     .badge.admin { background:#fee2e2; color:#991b1b; }
     .badge.viewer { background:#dcfce7; color:#166534; }
     .domain-badge { font-size:11px; padding:4px 8px; border-radius:4px; font-weight: 600;}
     .domain-internal { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
     .domain-external { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
-    
-    .link { color:var(--primary); text-decoration:none; font-weight:600; display: inline-flex; align-items: center; gap: 4px;}
+    .link { color:var(--primary); text-decoration:none; font-weight:600;}
     .link:hover { text-decoration:underline; }
-    .owner-sub { display:block; font-size:12px; color:var(--text-muted); margin-top:3px;}
-    
-    /* PROGRESS BAR */
-    .progress-wrapper { display:none; background: var(--surface); padding: 15px 20px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
-    .progress-header { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 8px;}
-    .progress-bar { height:8px; background:#e2e8f0; border-radius:10px; overflow:hidden; }
-    .progress-fill { height:100%; width:0%; background:linear-gradient(90deg, #2563eb, #3b82f6); transition:width 0.3s ease; }
   </style>
 </head>
 <body>
@@ -129,10 +126,8 @@
   <div class="login-box">
     <div style="font-size: 40px; margin-bottom: 10px;">🛡️</div>
     <h2>Laser Secure Portal</h2>
-    <p style="color:#64748b;font-size:14px;">Enter administrative password</p>
     <input type="password" id="passInput" placeholder="Enter Password..." autocomplete="off">
     <button onclick="checkPassword()">Verify & Access</button>
-    <p id="loginError" style="color:#ef4444;font-size:13px;display:none;margin-top:15px; font-weight: 600;">⚠️ Access Denied. Incorrect Password.</p>
   </div>
 </div>
 
@@ -145,14 +140,11 @@
         <button class="nav-btn" id="nav-smartsheet" onclick="switchPlatform('smartsheet')">Smartsheet DB</button>
       </div>
     </div>
-    <div id="syncIndicator" class="sync-status sync-loading">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
-      Connecting...
-    </div>
+    <div id="syncIndicator" class="sync-status sync-loading">⏳ Connecting...</div>
   </div>
 
-  <div class="hero" id="heroBanner">
-    <h1 id="heroTitle">Data Sharing Intelligence</h1>
+  <div class="hero">
+    <h1 id="heroTitle">Google Workspace Permissions</h1>
     <p style="opacity:0.85; font-size:15px; margin:0;">Live tracking of external shares, internal roles, and sheet ownership architecture.</p>
   </div>
 
@@ -163,18 +155,9 @@
         <input type="text" class="search-input" id="search" placeholder="Search by document, user, email or role..." onkeyup="render()">
       </div>
       <div class="action-group">
-        <button class="action-btn btn-blue" onclick="startScan(false)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-          Quick Scan
-        </button>
-        <button class="action-btn btn-red" onclick="startScan(true)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"/></svg>
-          Deep Sync
-        </button>
-        <button class="action-btn btn-green" onclick="downloadCSV()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-          Export CSV
-        </button>
+        <button class="action-btn btn-blue" onclick="startScan(false)">🔄 Quick Scan</button>
+        <button class="action-btn btn-red" onclick="startScan(true)">⚠️ Deep Sync</button>
+        <button class="action-btn btn-green" onclick="downloadCSV()">⬇️ Export CSV</button>
       </div>
     </div>
 
@@ -187,22 +170,26 @@
         </div>
       </div>
 
-      <select class="control-input" id="roleFilter" onchange="render()" style="min-width:180px;">
+      <select class="control-input" id="roleFilter" onchange="render()" style="min-width:160px;">
         <option value="">All Access Roles</option>
         <option value="owner">Owner / Admin</option>
         <option value="writer">Editor / Writer</option>
         <option value="reader">Viewer / Reader</option>
       </select>
 
+      <!-- NEW DOMAIN FILTER -->
+      <select class="control-input" id="domainFilter" onchange="render()" style="min-width:160px; border-color: var(--warning);">
+        <option value="all">🌐 All Domains</option>
+        <option value="internal">🏢 Internal Users</option>
+        <option value="external">⚠️ External / Public</option>
+        <option value="link">🔗 Group / Link</option>
+      </select>
+
       <div class="view-toggle">
-        <button class="view-btn active" id="view-accordion" onclick="setViewMode('accordion')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-          Sheet View
-        </button>
-        <button class="view-btn" id="view-table" onclick="setViewMode('table')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-          Table View
-        </button>
+        <button class="view-btn active" id="view-accordion" onclick="setViewMode('accordion')">📄 Sheet View</button>
+        <button class="view-btn" id="view-table" onclick="setViewMode('table')">📊 Excel Table</button>
+        <!-- NEW USER VIEW BUTTON -->
+        <button class="view-btn" id="view-user" onclick="setViewMode('user')">👤 User Analytics</button>
       </div>
     </div>
 
@@ -213,56 +200,47 @@
       <div class="stat-card alert"><div class="stat-val" id="statExternal" style="color:var(--danger)">0</div><div class="stat-label">External / Public Emails</div></div>
     </div>
 
-    <div class="progress-wrapper" id="progressWrapper">
-      <div class="progress-header">
-        <span id="progressText">Scanning database...</span>
-        <span id="progressPct">0%</span>
-      </div>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    </div>
-
     <div class="table-header-info">
       <span id="showingResults">Showing 0 records</span>
       <span id="viewStatusText">Grouped by Sheet View</span>
     </div>
 
     <div class="data-container" id="dataContainer">
-      <!-- Data injected here by JS -->
+      <!-- Data injected here -->
     </div>
   </div>
 </div>
 
 <script>
-// ==========================================
-// API URL UPDATED HERE
-// ==========================================
 const API_URL = "https://script.google.com/macros/s/AKfycby2JhLA0YGZ5bAVPGdp5MTuHDLz3TyRzA_CbCFxyH19H_GRCC7eNWY99-IvpND06ij5/exec"; 
 
 let platform = "google";
 let rawData = { google: [], smartsheet: [] };
 let filteredRows = [];
 let selectedSheet = "";
-let currentViewMode = "accordion"; // 'accordion' or 'table'
+let currentViewMode = "accordion"; 
 
-// Login Logic
+// Login 
 function checkPassword() {
-  const pass = document.getElementById('passInput').value;
-  if(pass === "Laser") {
+  if(document.getElementById('passInput').value === "Laser") {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     initializeData(); 
-  } else {
-    document.getElementById('loginError').style.display = 'block';
   }
 }
-document.getElementById('passInput').addEventListener('keypress', function(e) { if(e.key === 'Enter') checkPassword(); });
+document.getElementById('passInput').addEventListener('keypress', e => { if(e.key === 'Enter') checkPassword(); });
 
-// View Mode Toggle
+// View Toggles
 function setViewMode(mode) {
   currentViewMode = mode;
   document.getElementById('view-accordion').classList.toggle('active', mode === 'accordion');
   document.getElementById('view-table').classList.toggle('active', mode === 'table');
-  document.getElementById('viewStatusText').innerText = mode === 'accordion' ? 'Grouped by Sheet View' : 'Flat Table View';
+  document.getElementById('view-user').classList.toggle('active', mode === 'user');
+  
+  if(mode === 'accordion') document.getElementById('viewStatusText').innerText = 'Grouped by Sheet View';
+  else if(mode === 'table') document.getElementById('viewStatusText').innerText = 'Excel Style Table View';
+  else document.getElementById('viewStatusText').innerText = 'User Access Analytics Dashboard';
+  
   renderData();
 }
 
@@ -280,24 +258,17 @@ async function initializeData() {
 }
 
 async function fetchBatchData(platformToLoad) {
-  let startRow = 2;
-  const limit = 500; 
-  let allLoaded = false;
-  let accumulatedRows = [];
-
-  setSyncStatus('loading', `Fetching ${platformToLoad === 'google' ? 'Google' : 'Smartsheet'} Data...`);
-
+  let startRow = 2; const limit = 500; let allLoaded = false; let accumulatedRows = [];
+  setSyncStatus('loading', `Fetching DB...`);
   while (!allLoaded) {
     try {
       const res = await fetch(`${API_URL}?action=loadBatch&platform=${platformToLoad}&start=${startRow}&limit=${limit}`);
       const data = await res.json();
-
       if (data.status === "success") {
         accumulatedRows = accumulatedRows.concat(data.rows);
         startRow = data.nextStart;
         allLoaded = data.done;
-        setSyncStatus('loading', `Loading DB (${platformToLoad}): ${accumulatedRows.length} / ${data.total}`);
-      } else { break; }
+      } else break;
     } catch (err) { break; }
   }
   return accumulatedRows;
@@ -306,97 +277,55 @@ async function fetchBatchData(platformToLoad) {
 async function fetchAllFreshData() {
   const googleData = await fetchBatchData('google');
   const smartsheetData = await fetchBatchData('smartsheet');
-
   if(googleData.length > 0 || smartsheetData.length > 0) {
     rawData.google = googleData.length > 0 ? googleData : rawData.google;
     rawData.smartsheet = smartsheetData.length > 0 ? smartsheetData : rawData.smartsheet;
     localStorage.setItem("laserDashboardData", JSON.stringify(rawData));
     setSyncStatus('live', 'Live DB Connected');
-    populateSheetDropdown();
-    render(); 
-  } else {
-    setSyncStatus('offline', 'Network Error - Using Offline Data');
+    populateSheetDropdown(); render(); 
   }
 }
 
 function setSyncStatus(type, text) {
   const ind = document.getElementById("syncIndicator");
   let icon = type === 'live' ? '🟢' : type === 'offline' ? '⚠️' : '⏳';
-  ind.className = `sync-status sync-${type}`;
-  ind.innerHTML = `${icon} ${text}`;
+  ind.className = `sync-status sync-${type}`; ind.innerHTML = `${icon} ${text}`;
 }
 
-// Scanning Logic
 async function startScan(full) {
-  if(full && !confirm("Warning: A full rescan deletes previous logs. Continue?")) return;
-  
-  document.getElementById("progressWrapper").style.display = "block";
-  document.getElementById("progressPct").innerText = "0%";
-  document.getElementById("progressFill").style.width = "0%";
-  document.getElementById("progressText").innerText = `Starting ${platform} scan queue...`;
-  
+  if(full && !confirm("Warning: A full rescan deletes logs. Continue?")) return;
+  setSyncStatus('loading', 'Scanning System...');
   try {
     const res = await fetch(`${API_URL}?action=startScan&platform=${platform}&full=${full}`);
     const data = await res.json();
-    if(platform === 'google') rawData.google = data.rows || [];
-    else rawData.smartsheet = data.rows || [];
-    populateSheetDropdown();
-    render();
-    processBatch();
-  } catch(err) { document.getElementById("progressText").innerText = "Scan Error: " + err.message; }
+    if(platform === 'google') rawData.google = data.rows || []; else rawData.smartsheet = data.rows || [];
+    populateSheetDropdown(); render(); processBatch();
+  } catch(err) {}
 }
 
 async function processBatch() {
   try {
     const res = await fetch(`${API_URL}?action=processBatch&platform=${platform}`);
     const data = await res.json();
-    
     if(data.newRows && data.newRows.length) {
       if(platform === 'google') rawData.google = rawData.google.concat(data.newRows);
       else rawData.smartsheet = rawData.smartsheet.concat(data.newRows);
       populateSheetDropdown();
     }
-    
-    let pct = data.total ? Math.round((data.processed / data.total) * 100) : 100;
-    document.getElementById("progressPct").innerText = pct + "%";
-    document.getElementById("progressFill").style.width = pct + "%";
-    document.getElementById("progressText").innerText = `Scanning documents... ${data.processed} / ${data.total}`;
-    
     localStorage.setItem("laserDashboardData", JSON.stringify(rawData));
     render();
-
-    if(data.done) { 
-      document.getElementById("progressText").innerText = "Scan Completed Successfully ✅";
-      setTimeout(() => { document.getElementById("progressWrapper").style.display = "none"; }, 3000);
-      return; 
-    }
-    
+    if(data.done) { setSyncStatus('live', 'Scan Complete'); return; }
     setTimeout(processBatch, 800); 
-  } catch(err) { document.getElementById("progressText").innerText = "Batch Error: " + err.message; }
+  } catch(err) {}
 }
 
-// UI & Render Setup
+// Logic & Filters
 function switchPlatform(type) {
   platform = type;
   document.getElementById('nav-google').classList.toggle('active', type === 'google');
   document.getElementById('nav-smartsheet').classList.toggle('active', type === 'smartsheet');
-  
-  const hero = document.getElementById('heroBanner');
-  if(type === 'google') { 
-    hero.className = 'hero'; 
-    document.getElementById('heroTitle').innerText = "Google Workspace Permissions"; 
-  } else { 
-    hero.className = 'hero smartsheet-hero'; 
-    document.getElementById('heroTitle').innerText = "Smartsheet Enterprise Access"; 
-  }
-  
-  selectedSheet = "";
-  document.getElementById('sheetFilterDisplay').value = "";
-  document.getElementById('search').value = "";
-  document.getElementById('roleFilter').value = "";
-  
-  populateSheetDropdown();
-  render();
+  selectedSheet = ""; document.getElementById('sheetFilterDisplay').value = "";
+  populateSheetDropdown(); render();
 }
 
 function getCurrentRows() { return platform === 'google' ? rawData.google : rawData.smartsheet; }
@@ -404,41 +333,46 @@ function getCurrentRows() { return platform === 'google' ? rawData.google : rawD
 function isExternalDomain(email) {
   if(!email || email === '-') return false;
   email = String(email).toLowerCase();
-  return email.includes('@gmail') || email.includes('@yahoo') || email.includes('@hotmail') || email.includes('@outlook') || email.includes('anyone');
+  return email.includes('@gmail') || email.includes('@yahoo') || email.includes('@hotmail') || email.includes('anyone');
 }
 
 function render() {
   const q = document.getElementById("search").value.toLowerCase();
   const role = document.getElementById("roleFilter").value.toLowerCase();
+  const domainFilter = document.getElementById("domainFilter").value; // NEW FILTER VALUE
   const rows = getCurrentRows();
 
   filteredRows = rows.filter(r => {
+    // Basic Text Match
     const textMatch = [r.sheetName, r.userName, r.userEmail, r.role, r.ownerName].some(v => String(v||"").toLowerCase().includes(q));
     const roleMatch = !role || String(r.role||"").toLowerCase().includes(role);
     const sheetMatch = !selectedSheet || r.sheetName === selectedSheet;
-    return textMatch && roleMatch && sheetMatch;
+    
+    // Domain Match Logic
+    const isExt = isExternalDomain(r.userEmail);
+    const isLink = (!r.userEmail || r.userEmail === '-');
+    const isInt = !isExt && !isLink;
+    
+    let domainMatch = true;
+    if(domainFilter === 'internal') domainMatch = isInt;
+    else if(domainFilter === 'external') domainMatch = isExt;
+    else if(domainFilter === 'link') domainMatch = isLink;
+
+    return textMatch && roleMatch && sheetMatch && domainMatch;
   });
 
   const uniqueEmails = [...new Set(filteredRows.map(r=>r.userEmail).filter(Boolean))];
-  const externalCount = uniqueEmails.filter(e => isExternalDomain(e)).length;
   
   document.getElementById("statSheets").innerText = new Set(filteredRows.map(r=>r.fileId)).size;
   document.getElementById("statRows").innerText = filteredRows.length;
   document.getElementById("statUsers").innerText = uniqueEmails.length;
-  document.getElementById("statExternal").innerText = externalCount;
+  document.getElementById("statExternal").innerText = uniqueEmails.filter(e => isExternalDomain(e)).length;
   
   document.getElementById("showingResults").innerText = `Showing ${filteredRows.length} filtered records`;
-
   renderData();
 }
 
-// Accordion Toggle
-function toggleAccordion(id) {
-  const item = document.getElementById('acc-' + id);
-  item.classList.toggle('active');
-}
-
-// Generate Row HTML (Used in both views)
+// Generate Standard Row for Table/Accordion
 function generateRowHTML(r) {
   let roleClass = 'badge';
   if(String(r.role).toLowerCase().includes('owner')) roleClass = 'badge admin';
@@ -452,152 +386,137 @@ function generateRowHTML(r) {
   return `
     <tr>
       ${currentViewMode === 'table' ? `<td><strong>${esc(r.sheetName)}</strong></td>` : ''}
+      <td>${esc(r.ownerName||"System")}</td>
       <td>${esc(r.userName||"Unknown/Link")}</td>
       <td>${r.userEmail && r.userEmail !== '-' ? `<a href="mailto:${esc(r.userEmail)}" class="link">${esc(r.userEmail)}</a>` : '-'}</td>
-      <td><span class="${roleClass}">${esc(r.role||"-")}</span></td>
+      <td><span class="${roleClass}">${esc(r.role||"-").toUpperCase()}</span></td>
       <td>${domainBadge}</td>
-      <td style="color:var(--text-muted); font-size: 13px;">${esc(r.scannedAt||"-").split(',')[0]}</td>
-      ${currentViewMode === 'table' ? `
-        <td><a target="_blank" href="${esc(r.sheetUrl)}" class="link">Open File <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg></a></td>
-      ` : ''}
     </tr>
   `;
 }
 
-// Render the Data UI based on current view mode
+// RENDER ALL DATA
 function renderData() {
   const container = document.getElementById("dataContainer");
-  
-  if(!filteredRows.length) {
-    container.innerHTML = `<div style="text-align:center; padding:40px; color:#64748b; font-size:15px;">🔍 No matching records found. Try adjusting your filters.</div>`;
-    return;
-  }
+  if(!filteredRows.length) { container.innerHTML = `<div style="text-align:center; padding:40px; color:#64748b;">No matching records found.</div>`; return; }
 
-  // Optimize rendering for large datasets
-  const displayRows = filteredRows.slice(0, 800); // Display limit for performance
+  const displayRows = filteredRows.slice(0, 800); 
 
   if(currentViewMode === 'accordion') {
-    // Group by Sheet
+    // 1. SHEET ACCORDION VIEW
     const groups = {};
     displayRows.forEach(r => {
-      if(!groups[r.fileId]) {
-        groups[r.fileId] = { sheetName: r.sheetName, ownerName: r.ownerName, ownerEmail: r.ownerEmail, sheetUrl: r.sheetUrl, rows: [], extCount: 0 };
-      }
+      if(!groups[r.fileId]) groups[r.fileId] = { sheetName: r.sheetName, rows: [] };
       groups[r.fileId].rows.push(r);
-      if(isExternalDomain(r.userEmail)) groups[r.fileId].extCount++;
+    });
+    let html = '<table>';
+    Object.keys(groups).forEach((id, idx) => {
+      const g = groups[id];
+      html += `
+        <tbody class="accordion-item" id="acc-${idx}">
+          <tr class="accordion-header" onclick="document.getElementById('acc-${idx}').classList.toggle('active')">
+            <td colspan="5">📄 <b>${esc(g.sheetName)}</b> <span style="float:right; font-weight:normal; font-size:13px;">${g.rows.length} Users ▼</span></td>
+          </tr>
+        </tbody>
+        <tbody class="accordion-body" id="acc-body-${idx}">
+          <tr><th>Owner</th><th>Shared With</th><th>Email</th><th>Role</th><th>Domain</th></tr>
+          ${g.rows.map(generateRowHTML).join('')}
+        </tbody>
+      `;
+    });
+    container.innerHTML = html + '</table>';
+    
+  } 
+  else if (currentViewMode === 'table') {
+    // 2. EXCEL TABLE VIEW
+    let html = `
+      <table>
+        <thead><tr><th>Document Name</th><th>File Owner</th><th>Shared With</th><th>Email Address</th><th>Role</th><th>Domain</th></tr></thead>
+        <tbody>${displayRows.map(generateRowHTML).join('')}</tbody>
+      </table>`;
+    container.innerHTML = html;
+  }
+  else if (currentViewMode === 'user') {
+    // 3. USER ANALYTICS DASHBOARD VIEW
+    const users = {};
+    displayRows.forEach(r => {
+      const key = r.userEmail && r.userEmail !== '-' ? r.userEmail : r.userName; // Group by email, fallback to name
+      if(!users[key]) {
+        users[key] = {
+          name: r.userName || "Unknown", email: r.userEmail !== '-' ? r.userEmail : "",
+          isExt: isExternalDomain(r.userEmail), sheets: new Set(),
+          owner: 0, writer: 0, reader: 0
+        };
+      }
+      users[key].sheets.add(r.fileId);
+      const role = String(r.role).toLowerCase();
+      if(role.includes('owner')) users[key].owner++;
+      else if(role.includes('writer') || role.includes('editor')) users[key].writer++;
+      else users[key].reader++;
     });
 
-    let html = '';
-    Object.keys(groups).forEach((id, index) => {
-      const g = groups[id];
-      const extHtml = g.extCount > 0 ? `<span class="ext-chip">${g.extCount} External Users</span>` : '';
+    // Sort by most active user
+    const sortedUsers = Object.values(users).sort((a,b) => b.sheets.size - a.sheets.size).slice(0, 100);
+
+    let html = `<div class="user-grid">`;
+    sortedUsers.forEach(u => {
+      const initial = u.name.charAt(0).toUpperCase();
+      const totalRoles = u.owner + u.writer + u.reader;
+      const oPct = (u.owner/totalRoles)*100; const wPct = (u.writer/totalRoles)*100; const rPct = (u.reader/totalRoles)*100;
       
+      let badge = u.email === "" ? `<span class="domain-badge">Link</span>` : 
+                 (u.isExt ? `<span class="domain-badge domain-external">External</span>` : `<span class="domain-badge domain-internal">Internal</span>`);
+
       html += `
-        <div class="accordion-item" id="acc-${index}">
-          <div class="accordion-header" onclick="toggleAccordion('${index}')">
-            <div class="accordion-title">
-              📄 ${esc(g.sheetName)}
-              ${extHtml}
+        <div class="user-card">
+          <div class="user-top">
+            <div class="user-avatar">${initial}</div>
+            <div class="user-info">
+              <div class="user-name">${esc(u.name)}</div>
+              ${u.email ? `<a href="mailto:${esc(u.email)}" class="user-email">${esc(u.email)}</a>` : `<span class="user-email">No Email Provided</span>`}
             </div>
-            <div class="accordion-meta">
-              <span>👤 <b>Owner:</b> ${esc(g.ownerName||"System")}</span>
-              <span>👥 <b>${g.rows.length}</b> Permissions</span>
-              <a target="_blank" href="${esc(g.sheetUrl)}" class="link" onclick="event.stopPropagation();">Open ↗</a>
-              <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </div>
+            <div>${badge}</div>
           </div>
-          <div class="accordion-body">
-            <table>
-              <thead>
-                <tr>
-                  <th>Shared With (User)</th>
-                  <th>Email Address</th>
-                  <th>Access Role</th>
-                  <th>Domain Status</th>
-                  <th>Last Scanned</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${g.rows.map(generateRowHTML).join('')}
-              </tbody>
-            </table>
+          <div class="user-stats-row">
+            <div class="u-stat"><div class="u-stat-val">${u.sheets.size}</div><div class="u-stat-lbl">Sheets</div></div>
+            <div class="u-stat"><div class="u-stat-val">${u.owner}</div><div class="u-stat-lbl" style="color:#ef4444">Owner</div></div>
+            <div class="u-stat"><div class="u-stat-val">${u.writer}</div><div class="u-stat-lbl" style="color:#3b82f6">Writer</div></div>
+            <div class="u-stat"><div class="u-stat-val">${u.reader}</div><div class="u-stat-lbl" style="color:#10b981">Reader</div></div>
+          </div>
+          <div class="role-bar">
+            <div class="rb-owner" style="width:${oPct}%"></div>
+            <div class="rb-writer" style="width:${wPct}%"></div>
+            <div class="rb-reader" style="width:${rPct}%"></div>
           </div>
         </div>
       `;
     });
-    container.innerHTML = html;
-    
-  } else {
-    // Flat Table View
-    let html = `
-      <table>
-        <thead>
-          <tr>
-            <th>Document Name</th>
-            <th>Shared With (User)</th>
-            <th>Email Address</th>
-            <th>Access Role</th>
-            <th>Domain Status</th>
-            <th>Last Scanned</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${displayRows.map(generateRowHTML).join('')}
-        </tbody>
-      </table>
-    `;
-    container.innerHTML = html;
+    container.innerHTML = html + `</div>`;
   }
 }
 
-// Dropdown Logic
+// Dropdowns & Utils
 function toggleDropdown() {
   const dd = document.getElementById("sheetDropdown");
   dd.style.display = dd.style.display === "block" ? "none" : "block";
-  if(dd.style.display === "block") document.getElementById("sheetSearchBox").focus();
 }
-
 function populateSheetDropdown() {
-  const rows = getCurrentRows();
-  const sheets = [...new Set(rows.map(r=>r.sheetName).filter(Boolean))].sort();
+  const sheets = [...new Set(getCurrentRows().map(r=>r.sheetName).filter(Boolean))].sort();
   let html = `<div class="custom-option" onclick="selectSheet('')" style="color:var(--primary)"><b>Showing All Documents</b></div>`;
   sheets.forEach(s => html += `<div class="custom-option sheet-item" onclick="selectSheet('${esc(s).replace(/'/g, "\\'")}')">${esc(s)}</div>`);
   document.getElementById("sheetOptions").innerHTML = html;
 }
-
 function filterDropdownList() {
   const val = document.getElementById("sheetSearchBox").value.toLowerCase();
-  const items = document.querySelectorAll(".sheet-item");
-  items.forEach(item => item.style.display = item.innerText.toLowerCase().includes(val) ? "block" : "none");
+  document.querySelectorAll(".sheet-item").forEach(i => i.style.display = i.innerText.toLowerCase().includes(val) ? "block" : "none");
 }
-
-function selectSheet(sheetName) {
-  selectedSheet = sheetName;
-  document.getElementById("sheetFilterDisplay").value = sheetName || "";
-  document.getElementById("sheetDropdown").style.display = "none";
-  render();
-}
-
-document.addEventListener('click', function(e) {
-  const wrapper = document.getElementById('sheetFilterWrapper');
-  if(wrapper && !wrapper.contains(e.target)) {
-    document.getElementById('sheetDropdown').style.display = 'none';
-  }
-});
-
-// Utility
+function selectSheet(name) { selectedSheet = name; document.getElementById("sheetFilterDisplay").value = name||""; toggleDropdown(); render(); }
 function downloadCSV() {
-  const rows = [["Platform", "Document Name", "Owner Name", "Owner Email", "User Name", "User Email", "Role", "Domain Status", "Scanned At", "URL"]];
-  filteredRows.forEach(r => {
-    let domainStat = isExternalDomain(r.userEmail) ? "External" : (r.userEmail && r.userEmail !== '-' ? "Internal" : "Group/Link");
-    rows.push([platform, r.sheetName, r.ownerName, r.ownerEmail, r.userName, r.userEmail, r.role, domainStat, r.scannedAt, r.sheetUrl]);
-  });
+  const rows = [["Platform","Document","Owner","User","Email","Role","Scanned At","URL"]];
+  filteredRows.forEach(r => rows.push([platform, r.sheetName, r.ownerName, r.userName, r.userEmail, r.role, r.scannedAt, r.sheetUrl]));
   const csv = rows.map(row => row.map(v => '"'+String(v||"").replace(/"/g,'""')+'"').join(",")).join("\n");
-  const blob = new Blob([csv], {type:"text/csv"});
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `${platform}_security_report.csv`; a.click();
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download = `report.csv`; a.click();
 }
-
 function esc(t) { return String(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;"); }
 </script>
 </body>
