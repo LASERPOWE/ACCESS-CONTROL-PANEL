@@ -10,11 +10,10 @@
       --primary: #2563eb; --primary-hover: #1d4ed8; 
       --success: #10b981; --warning: #f59e0b; --danger: #ef4444; 
       --bg: #f8fafc; --surface: #ffffff; --text: #0f172a; --text-muted: #64748b;
-      --border: #cbd5e1; /* Darker border for excel look */
+      --border: #cbd5e1;
     }
     body { margin:0; font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--text); }
     
-    /* LOGIN SCREEN */
     #loginScreen { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); display:flex; justify-content:center; align-items:center; z-index:9999; }
     .login-box { background:var(--surface); padding:40px; border-radius:20px; text-align:center; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); width: 340px; border: 1px solid rgba(255,255,255,0.1); }
     .login-box h2 { margin-top:0; color:var(--text); font-size: 24px;}
@@ -77,22 +76,28 @@
     
     /* EXCEL-LIKE TABLE STYLES */
     .table-header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 14px; color: var(--text-muted); font-weight: 600;}
-    .data-container { background:var(--surface); overflow-x:auto; max-height: 65vh; overflow-y:auto; border: 1px solid var(--border); border-radius: 6px;}
+    .data-container { background:var(--bg); max-height: 65vh; overflow-y:auto; border-radius: 6px;}
+    .table-wrapper { background:var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow-x: auto; }
     
     table { width:100%; border-collapse:collapse; white-space:nowrap; background: #fff;}
-    th, td { border: 1px solid #cbd5e1; padding: 10px 15px; font-size: 13px;} /* Excel borders */
+    th, td { border: 1px solid #cbd5e1; padding: 10px 15px; font-size: 13px;}
     th { background:#f1f5f9; color:#334155; text-transform:uppercase; position:sticky; top:0; z-index:10; font-weight: 700; border-bottom: 2px solid #94a3b8;}
     tr:hover td { background:#f8fafc; }
     
-    /* ACCORDION STYLES */
-    .accordion-item { border-bottom: 2px solid var(--border); background: var(--surface); }
-    .accordion-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #e2e8f0; font-weight: bold;}
-    .accordion-body { display: none; }
-    .accordion-item.active .accordion-header { background: #dbeafe; color: var(--primary); border-bottom: 1px solid var(--primary);}
+    /* ACCORDION FIX (DIV BASED) */
+    .accordion-item { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; background: var(--surface); overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05);}
+    .accordion-header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #f8fafc; transition: 0.2s;}
+    .accordion-header:hover { background: #f1f5f9; }
+    .accordion-title { font-weight: 700; color: var(--text); font-size: 15px; display: flex; align-items: center; gap: 8px;}
+    .accordion-meta { font-size: 13px; color: var(--text-muted); font-weight: 600;}
+    .accordion-body { display: none; border-top: 1px solid var(--border); padding: 0; overflow-x: auto;}
+    
+    .accordion-item.active { border-color: var(--primary); }
+    .accordion-item.active .accordion-header { background: #eff6ff; color: var(--primary); }
     .accordion-item.active .accordion-body { display: block; }
     
     /* USER ANALYTICS GRID */
-    .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; padding: 10px; background: #f8fafc;}
+    .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; padding: 5px; }
     .user-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s;}
     .user-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: var(--primary);}
     .user-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;}
@@ -106,8 +111,6 @@
     .u-stat-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: bold;}
     .role-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 15px;}
     .rb-owner { background: #ef4444; } .rb-writer { background: #3b82f6; } .rb-reader { background: #10b981; }
-    .role-legend { display: flex; gap: 10px; font-size: 10px; margin-top: 6px; color: var(--text-muted); justify-content: center;}
-    .rl-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 3px;}
 
     /* BADGES */
     .badge { padding:4px 8px; border-radius:4px; font-size:11px; font-weight:700; background:#e0e7ff; color:#3730a3;}
@@ -177,7 +180,6 @@
         <option value="reader">Viewer / Reader</option>
       </select>
 
-      <!-- NEW DOMAIN FILTER -->
       <select class="control-input" id="domainFilter" onchange="render()" style="min-width:160px; border-color: var(--warning);">
         <option value="all">🌐 All Domains</option>
         <option value="internal">🏢 Internal Users</option>
@@ -188,7 +190,6 @@
       <div class="view-toggle">
         <button class="view-btn active" id="view-accordion" onclick="setViewMode('accordion')">📄 Sheet View</button>
         <button class="view-btn" id="view-table" onclick="setViewMode('table')">📊 Excel Table</button>
-        <!-- NEW USER VIEW BUTTON -->
         <button class="view-btn" id="view-user" onclick="setViewMode('user')">👤 User Analytics</button>
       </div>
     </div>
@@ -206,8 +207,7 @@
     </div>
 
     <div class="data-container" id="dataContainer">
-      <!-- Data injected here -->
-    </div>
+      </div>
   </div>
 </div>
 
@@ -220,7 +220,6 @@ let filteredRows = [];
 let selectedSheet = "";
 let currentViewMode = "accordion"; 
 
-// Login 
 function checkPassword() {
   if(document.getElementById('passInput').value === "Laser") {
     document.getElementById('loginScreen').style.display = 'none';
@@ -230,7 +229,6 @@ function checkPassword() {
 }
 document.getElementById('passInput').addEventListener('keypress', e => { if(e.key === 'Enter') checkPassword(); });
 
-// View Toggles
 function setViewMode(mode) {
   currentViewMode = mode;
   document.getElementById('view-accordion').classList.toggle('active', mode === 'accordion');
@@ -244,7 +242,6 @@ function setViewMode(mode) {
   renderData();
 }
 
-// Data Fetching
 async function initializeData() {
   const cachedData = localStorage.getItem("laserDashboardData");
   if(cachedData) {
@@ -319,7 +316,6 @@ async function processBatch() {
   } catch(err) {}
 }
 
-// Logic & Filters
 function switchPlatform(type) {
   platform = type;
   document.getElementById('nav-google').classList.toggle('active', type === 'google');
@@ -339,16 +335,14 @@ function isExternalDomain(email) {
 function render() {
   const q = document.getElementById("search").value.toLowerCase();
   const role = document.getElementById("roleFilter").value.toLowerCase();
-  const domainFilter = document.getElementById("domainFilter").value; // NEW FILTER VALUE
+  const domainFilter = document.getElementById("domainFilter").value; 
   const rows = getCurrentRows();
 
   filteredRows = rows.filter(r => {
-    // Basic Text Match
     const textMatch = [r.sheetName, r.userName, r.userEmail, r.role, r.ownerName].some(v => String(v||"").toLowerCase().includes(q));
     const roleMatch = !role || String(r.role||"").toLowerCase().includes(role);
     const sheetMatch = !selectedSheet || r.sheetName === selectedSheet;
     
-    // Domain Match Logic
     const isExt = isExternalDomain(r.userEmail);
     const isLink = (!r.userEmail || r.userEmail === '-');
     const isInt = !isExt && !isLink;
@@ -372,7 +366,6 @@ function render() {
   renderData();
 }
 
-// Generate Standard Row for Table/Accordion
 function generateRowHTML(r) {
   let roleClass = 'badge';
   if(String(r.role).toLowerCase().includes('owner')) roleClass = 'badge admin';
@@ -395,7 +388,10 @@ function generateRowHTML(r) {
   `;
 }
 
-// RENDER ALL DATA
+function toggleAccordion(id) {
+  document.getElementById(id).classList.toggle('active');
+}
+
 function renderData() {
   const container = document.getElementById("dataContainer");
   if(!filteredRows.length) { container.innerHTML = `<div style="text-align:center; padding:40px; color:#64748b;">No matching records found.</div>`; return; }
@@ -403,44 +399,48 @@ function renderData() {
   const displayRows = filteredRows.slice(0, 800); 
 
   if(currentViewMode === 'accordion') {
-    // 1. SHEET ACCORDION VIEW
+    // FIX: PROPER DIV BASED ACCORDION
     const groups = {};
     displayRows.forEach(r => {
       if(!groups[r.fileId]) groups[r.fileId] = { sheetName: r.sheetName, rows: [] };
       groups[r.fileId].rows.push(r);
     });
-    let html = '<table>';
+    
+    let html = '';
     Object.keys(groups).forEach((id, idx) => {
       const g = groups[id];
       html += `
-        <tbody class="accordion-item" id="acc-${idx}">
-          <tr class="accordion-header" onclick="document.getElementById('acc-${idx}').classList.toggle('active')">
-            <td colspan="5">📄 <b>${esc(g.sheetName)}</b> <span style="float:right; font-weight:normal; font-size:13px;">${g.rows.length} Users ▼</span></td>
-          </tr>
-        </tbody>
-        <tbody class="accordion-body" id="acc-body-${idx}">
-          <tr><th>Owner</th><th>Shared With</th><th>Email</th><th>Role</th><th>Domain</th></tr>
-          ${g.rows.map(generateRowHTML).join('')}
-        </tbody>
+        <div class="accordion-item" id="acc-${idx}">
+          <div class="accordion-header" onclick="toggleAccordion('acc-${idx}')">
+            <div class="accordion-title">📄 ${esc(g.sheetName)}</div>
+            <div class="accordion-meta">${g.rows.length} Permissions ▼</div>
+          </div>
+          <div class="accordion-body">
+            <table>
+              <thead><tr><th>Owner</th><th>Shared With</th><th>Email</th><th>Role</th><th>Domain</th></tr></thead>
+              <tbody>${g.rows.map(generateRowHTML).join('')}</tbody>
+            </table>
+          </div>
+        </div>
       `;
     });
-    container.innerHTML = html + '</table>';
+    container.innerHTML = html;
     
   } 
   else if (currentViewMode === 'table') {
-    // 2. EXCEL TABLE VIEW
     let html = `
-      <table>
-        <thead><tr><th>Document Name</th><th>File Owner</th><th>Shared With</th><th>Email Address</th><th>Role</th><th>Domain</th></tr></thead>
-        <tbody>${displayRows.map(generateRowHTML).join('')}</tbody>
-      </table>`;
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Document Name</th><th>File Owner</th><th>Shared With</th><th>Email Address</th><th>Role</th><th>Domain</th></tr></thead>
+          <tbody>${displayRows.map(generateRowHTML).join('')}</tbody>
+        </table>
+      </div>`;
     container.innerHTML = html;
   }
   else if (currentViewMode === 'user') {
-    // 3. USER ANALYTICS DASHBOARD VIEW
     const users = {};
     displayRows.forEach(r => {
-      const key = r.userEmail && r.userEmail !== '-' ? r.userEmail : r.userName; // Group by email, fallback to name
+      const key = r.userEmail && r.userEmail !== '-' ? r.userEmail : r.userName; 
       if(!users[key]) {
         users[key] = {
           name: r.userName || "Unknown", email: r.userEmail !== '-' ? r.userEmail : "",
@@ -455,7 +455,6 @@ function renderData() {
       else users[key].reader++;
     });
 
-    // Sort by most active user
     const sortedUsers = Object.values(users).sort((a,b) => b.sheets.size - a.sheets.size).slice(0, 100);
 
     let html = `<div class="user-grid">`;
@@ -495,7 +494,6 @@ function renderData() {
   }
 }
 
-// Dropdowns & Utils
 function toggleDropdown() {
   const dd = document.getElementById("sheetDropdown");
   dd.style.display = dd.style.display === "block" ? "none" : "block";
@@ -512,8 +510,8 @@ function filterDropdownList() {
 }
 function selectSheet(name) { selectedSheet = name; document.getElementById("sheetFilterDisplay").value = name||""; toggleDropdown(); render(); }
 function downloadCSV() {
-  const rows = [["Platform","Document","Owner","User","Email","Role","Scanned At","URL"]];
-  filteredRows.forEach(r => rows.push([platform, r.sheetName, r.ownerName, r.userName, r.userEmail, r.role, r.scannedAt, r.sheetUrl]));
+  const rows = [["Platform","Document","Owner","User","Email","Role","Scanned At"]];
+  filteredRows.forEach(r => rows.push([platform, r.sheetName, r.ownerName, r.userName, r.userEmail, r.role, r.scannedAt]));
   const csv = rows.map(row => row.map(v => '"'+String(v||"").replace(/"/g,'""')+'"').join(",")).join("\n");
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download = `report.csv`; a.click();
 }
